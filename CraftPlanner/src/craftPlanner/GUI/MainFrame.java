@@ -33,6 +33,7 @@ import craftPlanner.GUI.actions.Actions;
 import craftPlanner.GUI.planning.PlanFrame;
 import craftPlanner.GUI.planning.PlanNodeEditor;
 import craftPlanner.crafts.Item;
+import craftPlanner.crafts.Machine;
 import craftPlanner.crafts.Recipe;
 import craftPlanner.crafts.Registry;
 public class MainFrame extends JFrame implements ActionListener, ItemListener{
@@ -40,10 +41,12 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
     Keyboard keyboard;
     JList<Item> itemlist;
     DefaultListModel<Item> listModel;
-    JList<Recipe> RecipeList;
-    DefaultListModel<Recipe> RecipeModel;
+    JList<Recipe> mecipeList;
+    DefaultListModel<Recipe> recipeModel;
+    JList<Machine> machineList;
+    DefaultListModel<Machine> machineModel;
     JTextArea info;
-    PlanFrame plan;
+    public PlanFrame plan;
     public PlanNodeEditor editor;
     public MainFrame(){
         keyboard = new Keyboard(this);
@@ -104,12 +107,11 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
         
 
         JPanel RecipePane = new JPanel(new BorderLayout(5,5));
-        RecipeModel = new DefaultListModel<Recipe>();
-        RecipeList = new JList<>(RecipeModel);
-        RecipeList.setLayoutOrientation(JList.VERTICAL);
-        RecipeList.setVisibleRowCount(-1);
-        JScrollPane RecipeListScroll = new JScrollPane(RecipeList);
-        RecipeListScroll.setPreferredSize(new Dimension(200, 800));
+        recipeModel = new DefaultListModel<Recipe>();
+        mecipeList = new JList<>(recipeModel);
+        mecipeList.setLayoutOrientation(JList.VERTICAL);
+        mecipeList.setVisibleRowCount(-1);
+        JScrollPane RecipeListScroll = new JScrollPane(mecipeList);
         RecipeListScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         RecipeListScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
@@ -132,7 +134,42 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
 
         RecipePane.add(RecipeListScroll, BorderLayout.CENTER);
         RecipePane.add(buttonPaneR,BorderLayout.PAGE_END);
-        contentPane.add(RecipePane, BorderLayout.LINE_START);
+
+        JPanel MachinePane = new JPanel(new BorderLayout(5,5));
+        machineModel = new DefaultListModel<Machine>();
+        machineList = new JList<>(machineModel);
+        machineList.setLayoutOrientation(JList.VERTICAL);
+        machineList.setVisibleRowCount(-1);
+        JScrollPane MachineListScroll = new JScrollPane(machineList);
+        MachineListScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        MachineListScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+
+        JPanel buttonPaneM = new JPanel();
+        buttonPaneM.setLayout(new BoxLayout(buttonPaneM, BoxLayout.LINE_AXIS));
+        buttonPaneM.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        buttonPaneM.add(Box.createHorizontalGlue());
+
+        JButton destroyButtonM = new JButton("Destroy");
+        destroyButtonM.setActionCommand("DestroyMachine");
+        destroyButtonM.addActionListener(this);
+
+        buttonPaneM.add(destroyButtonM);
+
+        JButton addButtonM = new JButton("Add");
+        addButtonM.setActionCommand("AddMachine");
+        addButtonM.addActionListener(this);
+
+        buttonPaneM.add(addButtonM);
+
+        MachinePane.add(MachineListScroll, BorderLayout.CENTER);
+        MachinePane.add(buttonPaneM,BorderLayout.PAGE_END);
+
+        JPanel combinedPane = new JPanel(new GridLayout(1,2));
+        combinedPane.setPreferredSize(new Dimension(400,800));
+
+        combinedPane.add(MachinePane);
+        combinedPane.add(RecipePane);
+        contentPane.add(combinedPane, BorderLayout.LINE_START);
         
         GridLayout experimentLayout = new GridLayout(1,2);
         JPanel bottomComponent = new JPanel(experimentLayout);
@@ -157,6 +194,9 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
         bottomComponent.add(editor);
         contentPane.add(bottomComponent, BorderLayout.PAGE_END);
 
+        this.setGlassPane(new PlanFrame.PlanPanel());
+        this.getGlassPane().setVisible(true);
+
         return contentPane;
     }
     // https://docs.oracle.com/javase/tutorial/uiswing/components/menu.html
@@ -169,7 +209,9 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
         menuBar.add(menu);
 
         menu.add(createMenuItem("Create Item", Actions.CREATE_ITEM, KeyEvent.VK_I));
-        menu.add(createMenuItem("Create Recipe", Actions.CREATE_Recipe, KeyEvent.VK_R));
+        menu.add(createMenuItem("Create Recipe", Actions.CREATE_RECIPE, KeyEvent.VK_R));
+        menu.add(createMenuItem("Create Machine", Actions.CREATE_MACHINE, KeyEvent.VK_M));
+        menu.add(createMenuItem("Create Machine Recipe", Actions.CREATE_MACHINE_RECIPE, KeyEvent.VK_T));
         menu.add(createCheckbox("Automatically Add Items", "AutoAdd", KeyEvent.VK_A));
         return menuBar;
     }
@@ -200,8 +242,14 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
             case Actions.CREATE_ITEM:
                 Actions.CreateItem();
                 break;
-            case Actions.CREATE_Recipe:
+            case Actions.CREATE_RECIPE:
                 Actions.CreateRecipe();
+                break;
+            case Actions.CREATE_MACHINE:
+                Actions.CreateMachine();
+                break;
+            case Actions.CREATE_MACHINE_RECIPE:
+                Actions.CreateMachineRecipe();
                 break;
             case "DestroyItem":
                 destroySelectedItems();
@@ -211,6 +259,9 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
                 break;
             case "AddRecipe":
                 addSelectedRecipes();
+                break;
+            case "DestroyMachine":
+                destroySelectedMachines();
                 break;
             default:
                 System.err.println("Are you fucking stupid? " + e.getActionCommand());
@@ -228,15 +279,23 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
     }
 
     private void destroySelectedRecipes(){
-        List<Recipe> selected = RecipeList.getSelectedValuesList();
+        List<Recipe> selected = mecipeList.getSelectedValuesList();
         for (Recipe recipe : selected) {
             Registry.removeRecipe(recipe);
         }
         updateRegistery();
     }
 
+    private void destroySelectedMachines(){
+        List<Machine> selected = machineList.getSelectedValuesList();
+        for (Machine Machine : selected) {
+            Registry.removeMachine(Machine);
+        }
+        updateRegistery();
+    }
+
     private void addSelectedRecipes(){
-        List<Recipe> selected = RecipeList.getSelectedValuesList();
+        List<Recipe> selected = mecipeList.getSelectedValuesList();
         for (Recipe recipe : selected) {
             plan.addPlanNode(recipe);
         }
@@ -247,9 +306,13 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
         for (Item i : Registry.items) {
             listModel.addElement(i);
         }
-        RecipeModel.removeAllElements();
+        recipeModel.removeAllElements();
         for (Recipe i : Registry.Recipes) {
-            RecipeModel.addElement(i);
+            recipeModel.addElement(i);
+        }
+        machineModel.removeAllElements();
+        for (Machine i : Registry.machines) {
+            machineModel.addElement(i);
         }
     }
 

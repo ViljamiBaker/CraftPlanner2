@@ -13,6 +13,8 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import craftPlanner.GUI.actions.DraggableComponent;
+import craftPlanner.crafts.Item;
+import craftPlanner.crafts.ItemCost;
 import craftPlanner.crafts.Recipe;
 
 public class PlanNode extends DraggableComponent{
@@ -151,27 +153,42 @@ public class PlanNode extends DraggableComponent{
                 }
             }
             info = "Craft Successful";
+            String str = String.valueOf(craftCount);
+            str = str.substring(0,Math.min(str.length()-1, 8));
+            craftCountText.setText(str);
             return true;
         }
+        ItemCost[] crafting = new ItemCost[r.products().length];
+        for (int i = 0; i < crafting.length; i++) {
+            crafting[i] = new ItemCost(r.products()[i].item(),0);
+        }
+        for (NodeConnection nc : outgoingConnections) {
+            for (int i = 0; i < crafting.length; i++) {
+                if(!crafting[i].item().equals(nc.cost.item())) continue;
+                crafting[i].setCost(crafting[i].cost()+nc.cost.cost());
+            }
+            nc.fufilled = true;
+        }
         craftCount = -1.0;
-        for (NodeConnection nodeConnection : outgoingConnections) {
-            double count = nodeConnection.cost.cost();
+        for (int i = 0; i < crafting.length; i++) {
+            double count = crafting[i].cost();
             if(r.isMachineRecipe()){
                 // treat c.cost as items/s for this
-                double production = r.getProduction(nodeConnection.cost.item())/r.craftTime() * craftCount;
+                double production = r.getProduction(crafting[i].item())/r.craftTime() * craftCount;
                 if(production<count){
-                    craftCount = nodeConnection.cost.cost() / r.getProduction(nodeConnection.cost.item()) * r.craftTime();
+                    craftCount = crafting[i].cost() / r.getProduction(crafting[i].item()) * r.craftTime();
                 }
             }else{
-                double production = r.getProduction(nodeConnection.cost.item()) * craftCount;
+                double production = r.getProduction(crafting[i].item()) * craftCount;
                 if(production<count){
-                    craftCount = nodeConnection.cost.cost() / r.getProduction(nodeConnection.cost.item());
+                    craftCount = crafting[i].cost() / r.getProduction(crafting[i].item());
                 }
             }
-            nodeConnection.fufilled = true;
         }
         updateDownstream();
-        craftCountText.setText(String.valueOf(craftCount));;
+        String str = String.valueOf(craftCount);
+        str = str.substring(0,Math.min(str.length()-1, 8));
+        craftCountText.setText(str);
         for (NodeConnection nodeConnection : incomingConnections) {
             if(!nodeConnection.from.update(layer+1)){
                 info = "Craft Failed";
@@ -208,5 +225,15 @@ public class PlanNode extends DraggableComponent{
         selectedIndecator.setBackground(newcolor);
         selectedIndecator.setText(newStatus);
         this.repaint();
+    }
+
+    public boolean hasConnection(PlanNode n2, Item i){
+        for (NodeConnection nc : incomingConnections) {
+            if(nc.from.equals(n2)&&nc.cost.item().equals(i)) return true;
+        }
+        for (NodeConnection nc : n2.incomingConnections) {
+            if(nc.from.equals(this)&&nc.cost.item().equals(i)) return true;
+        }
+        return false;
     }
 }

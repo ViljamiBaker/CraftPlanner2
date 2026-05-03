@@ -71,4 +71,14 @@ public record Recipe(ItemCost[] requirements, ItemCost[] products, Machine machi
         }
         return -1.0;
     }
+
+    public Item findCommonItem(Recipe r){
+        for (ItemCost prod : products) {
+            for (ItemCost req : r.requirements) {
+                if(prod.item().equals(req.item()))
+                    return prod.item();
+            }
+        }
+        return null;
+    }
 }

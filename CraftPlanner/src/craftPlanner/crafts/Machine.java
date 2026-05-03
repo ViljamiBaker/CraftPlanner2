@@ -11,7 +11,7 @@ public record Machine(String name, ItemCost[] costPerSecond) {
     }
     @Override
     public String toString(){
-        return name;
+        return name + " " + Recipe.CreateRecipeString(costPerSecond) + "\s";
     }
     public boolean usesItem(Item i){
         for (ItemCost itemCost : costPerSecond) {

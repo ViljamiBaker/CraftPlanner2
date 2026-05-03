@@ -15,7 +15,6 @@ import craftPlanner.crafts.Registry;
 public class Actions {
     private static class CustomFrame extends JFrame implements ActionListener{
         public CustomFrame(){
-            this.setTitle("create new item");
             this.setVisible(true);
             Rectangle bounds = MainFrame.mainFrame.getBounds();
             this.setBounds((int)bounds.getCenterX()-150,(int)bounds.getCenterY()-100,300, 200);
@@ -49,7 +48,8 @@ public class Actions {
     private static class CreateItemFrame extends CustomFrame{
         GhostText name;
         public CreateItemFrame(){
-            name = new GhostText(new JTextField(""), "Name Here");
+            this.setTitle("Create new item");
+            name = new GhostText(new JTextField(""), "Name here");
             name.textfield.setBounds(50,32,200,25);
             this.add(name.textfield);
         }
@@ -67,15 +67,16 @@ public class Actions {
         new CreateItemFrame();
     }
 
-    public static final String CREATE_Recipe = "CreateRecipe";
+    public static final String CREATE_RECIPE = "CreateRecipe";
     private static class CreateRecipeFrame extends CustomFrame{
         GhostText cost;
         GhostText product;
         public CreateRecipeFrame(){
-            cost = new GhostText(new JTextField(""), "Cost Here");
+            this.setTitle("Create new recipe");
+            cost = new GhostText(new JTextField(""), "Cost here");
             cost.textfield.setBounds(50,20,200,25);
             this.add(cost.textfield);
-            product = new GhostText(new JTextField(""), "Products Here");
+            product = new GhostText(new JTextField(""), "Products here");
             product.textfield.setBounds(50,45,200,25);
             this.add(product.textfield);
             
@@ -100,5 +101,89 @@ public class Actions {
     }
     public static void CreateRecipe(){
         new CreateRecipeFrame();
+    }
+
+    public static final String CREATE_MACHINE = "CreateMachine";
+    private static class CreateMachineFrame extends CustomFrame{
+        GhostText namefeild;
+        GhostText requirement;
+        public CreateMachineFrame(){
+            this.setTitle("Create new machine");
+            namefeild = new GhostText(new JTextField(""), "Name here");
+            namefeild.textfield.setBounds(50,20,200,25);
+            this.add(namefeild.textfield);
+            requirement = new GhostText(new JTextField(""), "Requirements here");
+            requirement.textfield.setBounds(50,45,200,25);
+            this.add(requirement.textfield);
+            
+        }
+        @Override
+        public void runEvent(){
+            String name = namefeild.getText();
+            ItemCost[] products = null;
+            try {
+                products = Registry.createItemCosts(requirement.getText());
+            } catch (Exception e) {
+                if(e.getClass().equals(IllegalArgumentException.class)){
+                    MainFrame.mainFrame.addInfo(e.getMessage());
+                }
+            }
+            namefeild.delete();
+            requirement.delete();
+            if(name.length()==0||products == null) return;
+            Registry.createMachine(name, products);
+        }
+    }
+    public static void CreateMachine(){
+        new CreateMachineFrame();
+    }
+
+    public static final String CREATE_MACHINE_RECIPE = "CreateMachineRecipe";
+    private static class CreateMachineRecipeFrame extends CustomFrame{
+        GhostText namefeild;
+        GhostText product;
+        GhostText requirement;
+        GhostText timefeild;
+        public CreateMachineRecipeFrame(){
+            this.setTitle("Create new machine recipe");
+            product = new GhostText(new JTextField(""), "Products here");
+            product.textfield.setBounds(50,5,200,25);
+            this.add(product.textfield);
+            requirement = new GhostText(new JTextField(""), "Requirements here");
+            requirement.textfield.setBounds(50,30,200,25);
+            this.add(requirement.textfield);
+            namefeild = new GhostText(new JTextField(""), "Name here");
+            namefeild.textfield.setBounds(50,55,100,25);
+            this.add(namefeild.textfield);
+            timefeild = new GhostText(new JTextField(""), "Time here");
+            timefeild.textfield.setBounds(150,55,100,25);
+            this.add(timefeild.textfield);
+            
+        }
+        @Override
+        public void runEvent(){
+            String name = namefeild.getText();
+            ItemCost[] products = null;
+            ItemCost[] requirements = null;
+            double time = -1.0;
+            try {
+                products = Registry.createItemCosts(product.getText());
+                requirements = Registry.createItemCosts(requirement.getText());
+                time = Double.valueOf(timefeild.getText());
+            } catch (Exception e) {
+                if(e.getClass().equals(IllegalArgumentException.class)){
+                    MainFrame.mainFrame.addInfo(e.getMessage());
+                }
+            }
+            namefeild.delete();
+            product.delete();
+            requirement.delete();
+            timefeild.delete();
+            if(name.length()==0||products == null) return;
+            Registry.createMachineRecipe(requirements, products, name, time);
+        }
+    }
+    public static void CreateMachineRecipe(){
+        new CreateMachineRecipeFrame();
     }
 }

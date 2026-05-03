@@ -7,11 +7,16 @@ import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 
+import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 
 import craftPlanner.GUI.MainFrame;
 import craftPlanner.GUI.actions.GhostText;
@@ -57,7 +62,15 @@ public class PlanNodeEditor extends JPanel implements ActionListener{
         panel.setBackground(Color.WHITE);
         JButton button = createButton("Delete", "KillMe");
         JButton requestButton = createButton("Request", "Request");
-        JButton connectButton = createButton("Connect", "Connect");
+        JButton connectButton = createButton("<html><u>C</u>onnect</html>", "Connect");
+        connectButton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+            .put(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.SHIFT_DOWN_MASK), "CONNECT");
+        connectButton.getActionMap().put("CONNECT", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                connectButton.doClick(); // Simulates a physical click
+            }
+        });
         JButton disconnectButton = createButton("Disconnect", "Disconnect");
         requirements = createTextFeild("", false, true);
         JTextField inforeq = createTextFeild("Products: ", false, false);
@@ -168,6 +181,7 @@ public class PlanNodeEditor extends JPanel implements ActionListener{
             thisinfo.setText("No node selected");
             return;
         }
+        MainFrame.mainFrame.getGlassPane().repaint();
         thisinfo.setText("");
         switch (e.getActionCommand()) {
             case "KillMe":
@@ -180,12 +194,18 @@ public class PlanNodeEditor extends JPanel implements ActionListener{
                 connect();
                 break;
             case "Disconnect":
-                selectedNode.outgoingConnections.clear();
+                disconnect();
                 break;
             default:
                 System.err.println("Are you fucking stupid? " + e.getActionCommand());
                 break;
         }
+    }
+    public void disconnect(){
+        for (NodeConnection nc : selectedNode.outgoingConnections) {
+            nc.to.incomingConnections.remove(nc);
+        }
+        selectedNode.outgoingConnections.clear();
     }
     public void killMe(){
         PlanFrame.planFrame.removePlanNode(selectedNode);
@@ -247,8 +267,12 @@ public class PlanNodeEditor extends JPanel implements ActionListener{
         }
         Item[] selectedItems = MainFrame.mainFrame.getSelectedItems();
         if(selectedItems.length == 0){
-            thisinfo.setText("Select item to supply");
-            return;
+            Item i = connectingNode.r.findCommonItem(selectedNode.r);
+            if(i == null){
+                thisinfo.setText("Select item to supply");
+                return;
+            }
+            selectedItems = new Item[]{i};
         }
         for (Item item : selectedItems) {
             if(!connectingNode.r.producesItem(item)){
@@ -258,6 +282,11 @@ public class PlanNodeEditor extends JPanel implements ActionListener{
             }
             if(!selectedNode.r.requiresItem(item)){
                 thisinfo.setText("Node does not consume \"" + item + "\"");
+                deselectConnectedNodes();
+                return;
+            }
+            if(selectedNode.hasConnection(connectingNode, item)){
+                thisinfo.setText("Nodes already connected with \"" + item + "\"");
                 deselectConnectedNodes();
                 return;
             }
@@ -292,7 +321,9 @@ public class PlanNodeEditor extends JPanel implements ActionListener{
         }else{
             machine.setText("null");
         }
-        time.setText(String.valueOf(n.r.craftTime()));
+        String str = String.valueOf(n.r.craftTime());
+        str = str.substring(0,Math.min(str.length()-1, 8));
+        time.setText(str);
         this.repaint();
         producingFeild.setText("Crafting: " + n.craftCount);
     }

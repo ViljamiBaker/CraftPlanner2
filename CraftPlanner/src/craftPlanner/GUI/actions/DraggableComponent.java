@@ -7,6 +7,8 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 
 import javax.swing.JComponent;
+
+import craftPlanner.GUI.MainFrame;
 //https://stackoverflow.com/questions/874360/swing-creating-a-draggable-component
 public class DraggableComponent
     extends JComponent implements MouseMotionListener,MouseListener {
@@ -20,6 +22,7 @@ public class DraggableComponent
     public DraggableComponent() {
         this.addMouseMotionListener(this);
         this.addMouseListener(this);
+        moveTo(0);
     }
     
     @Override
@@ -43,6 +46,7 @@ public class DraggableComponent
         }
         setLocation(newx, newy);
         moveTo(minlayer);
+        MainFrame.mainFrame.getGlassPane().repaint();
     }
     
     @Override
