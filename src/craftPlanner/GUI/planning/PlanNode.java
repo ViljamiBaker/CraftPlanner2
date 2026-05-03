@@ -89,14 +89,14 @@ public class PlanNode extends DraggableComponent{
 
         c.weighty = 1.0;
 
-        prodName = createTextFeild(Recipe.CreateRecipeString(r.products()), true, true);
+        recName = createTextFeild(Recipe.CreateRecipeString(r.requirements()), true, true);
         c.gridy = 0;
         c.gridwidth = 1;
-        otherStuffPanel.add(prodName,c);
-        recName = createTextFeild(Recipe.CreateRecipeString(r.requirements()), true, true);
+        otherStuffPanel.add(recName,c);
+        prodName = createTextFeild(Recipe.CreateRecipeString(r.products()), true, true);
         c.gridy = 1;
         c.gridwidth = 1;
-        otherStuffPanel.add(recName,c);
+        otherStuffPanel.add(prodName,c);
         craftCountText = createTextFeild(String.valueOf(craftCount), false, true);
         c.gridy = 2;
         c.gridwidth = 1;

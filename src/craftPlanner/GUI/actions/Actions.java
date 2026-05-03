@@ -73,7 +73,7 @@ public class Actions {
         GhostText product;
         public CreateRecipeFrame(){
             this.setTitle("Create new recipe");
-            cost = new GhostText(new JTextField(""), "Cost here");
+            cost = new GhostText(new JTextField(""), "Requirements here");
             cost.textfield.setBounds(50,20,200,25);
             this.add(cost.textfield);
             product = new GhostText(new JTextField(""), "Products here");
@@ -109,12 +109,12 @@ public class Actions {
         GhostText requirement;
         public CreateMachineFrame(){
             this.setTitle("Create new machine");
-            namefeild = new GhostText(new JTextField(""), "Name here");
-            namefeild.textfield.setBounds(50,20,200,25);
-            this.add(namefeild.textfield);
             requirement = new GhostText(new JTextField(""), "Requirements here");
-            requirement.textfield.setBounds(50,45,200,25);
+            requirement.textfield.setBounds(50,20,200,25);
             this.add(requirement.textfield);
+            namefeild = new GhostText(new JTextField(""), "Name here");
+            namefeild.textfield.setBounds(50,45,200,25);
+            this.add(namefeild.textfield);
             
         }
         @Override
@@ -146,13 +146,13 @@ public class Actions {
         GhostText timefeild;
         public CreateMachineRecipeFrame(){
             this.setTitle("Create new machine recipe");
-            product = new GhostText(new JTextField(""), "Products here");
-            product.textfield.setBounds(50,5,200,25);
-            this.add(product.textfield);
             requirement = new GhostText(new JTextField(""), "Requirements here");
-            requirement.textfield.setBounds(50,30,200,25);
+            requirement.textfield.setBounds(50,5,200,25);
             this.add(requirement.textfield);
-            namefeild = new GhostText(new JTextField(""), "Name here");
+            product = new GhostText(new JTextField(""), "Products here");
+            product.textfield.setBounds(50,30,200,25);
+            this.add(product.textfield);
+            namefeild = new GhostText(new JTextField(""), "Machine here");
             namefeild.textfield.setBounds(50,55,100,25);
             this.add(namefeild.textfield);
             timefeild = new GhostText(new JTextField(""), "Time here");

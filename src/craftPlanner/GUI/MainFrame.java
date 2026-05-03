@@ -253,6 +253,11 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
             case "LoadCombined":
                 file(false, FileType.COMBINED);
                 break;
+            case "Quit":
+                this.setVisible(false);
+                this.dispose();
+                System.exit(0);
+                break;
             default:
                 System.err.println("Are you fucking stupid? " + e.getActionCommand());
                 break;
@@ -319,6 +324,24 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
     // https://docs.oracle.com/javase/tutorial/uiswing/components/menu.html
     private JMenuBar setupMenu(){
         JMenuBar menuBar = new JMenuBar();
+
+        JMenu file = new JMenu("File");
+        file.setMnemonic(KeyEvent.VK_F);
+        menuBar.add(file);
+        
+        file.add(createMenuItem("Quit", "Quit", KeyEvent.VK_Q, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
+        file.addSeparator();
+        file.add(createMenuItem("Save Registery", "SaveReg", KeyEvent.VK_S, InputEvent.SHIFT_DOWN_MASK));
+        file.add(createMenuItem("Load Registery", "LoadReg", KeyEvent.VK_L, InputEvent.SHIFT_DOWN_MASK));
+        file.addSeparator();
+        file.add(createMenuItem("Save Plan", "SavePlan", KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK));
+        file.add(createMenuItem("Load Plan", "LoadPlan", KeyEvent.VK_L, InputEvent.CTRL_DOWN_MASK));
+        file.addSeparator();
+        file.add(createMenuItem("Save Combined", "SaveCombined", KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
+        file.add(createMenuItem("Load Combined", "LoadCombined", KeyEvent.VK_L, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
+        file.addSeparator();
+        file.add(createCheckbox("Remove Plan on Load", "RemPlan", 0));
+        
         JMenu creation = new JMenu("Creation");
         creation.setMnemonic(KeyEvent.VK_C);
         menuBar.add(creation);
@@ -328,23 +351,8 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
         creation.add(createMenuItem("Create Machine", Actions.CREATE_MACHINE, KeyEvent.VK_M));
         creation.add(createMenuItem("Create Machine Recipe", Actions.CREATE_MACHINE_RECIPE, KeyEvent.VK_T));
         creation.addSeparator();
-        creation.add(createCheckbox("Automatically Add Items", "AutoAdd", KeyEvent.VK_A));
-        creation.add(createCheckbox("Require Round Crafts", "ReqRound", KeyEvent.VK_E));
-
-        JMenu file = new JMenu("File");
-        file.setMnemonic(KeyEvent.VK_F);
-        menuBar.add(file);
-        
-        file.add(createMenuItem("Save Registery", "SaveReg", KeyEvent.VK_S, InputEvent.SHIFT_DOWN_MASK));
-        file.add(createMenuItem("Load Registery", "LoadReg", KeyEvent.VK_L, InputEvent.SHIFT_DOWN_MASK));
-        file.addSeparator();
-        file.add(createMenuItem("Save Plan", "SavePlan", KeyEvent.VK_S, InputEvent.ALT_DOWN_MASK));
-        file.add(createMenuItem("Load Plan", "LoadPlan", KeyEvent.VK_L, InputEvent.ALT_DOWN_MASK));
-        file.addSeparator();
-        file.add(createMenuItem("Save Combined", "SaveCombined", KeyEvent.VK_S, InputEvent.ALT_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
-        file.add(createMenuItem("Load Combined", "LoadCombined", KeyEvent.VK_L, InputEvent.ALT_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
-        file.addSeparator();
-        file.add(createCheckbox("Remove Plan on Load", "RemPlan", 0));
+        creation.add(createCheckbox("Automatically Add Items", "AutoAdd", 0));
+        creation.add(createCheckbox("Require Round Crafts", "ReqRound", 0));
 
         return menuBar;
     }
