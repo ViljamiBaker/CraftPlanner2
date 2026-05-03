@@ -114,6 +114,7 @@ public class PlanFrame extends JPanel{
         panel.repaint();
         SwingUtilities.updateComponentTreeUI(panel);
         nodes.add(node);
+        node.setLocation(SwingUtilities.convertPoint(this, 10 + (nodes.size() % 10) * 10,10 + (nodes.size() % 10) * 6, panel));
         //panel.setComponentZOrder(paintpanel, panel.getComponentCount() - 1);
     }
     public void removePlanNode(PlanNode n){
@@ -126,6 +127,14 @@ public class PlanFrame extends JPanel{
                 nodes.remove(n);
                 if(n.equals(MainFrame.mainFrame.editor.selectedNode))
                     MainFrame.mainFrame.editor.deselectNode();
+                for (NodeConnection nc : n.incomingConnections) {
+                    nc.from.outgoingConnections.remove(nc);
+                }
+                n.incomingConnections.clear();
+                for (NodeConnection nc : n.outgoingConnections) {
+                    nc.to.incomingConnections.remove(nc);
+                }
+                n.outgoingConnections.clear();
             }
         });
     }

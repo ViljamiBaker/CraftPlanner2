@@ -6,19 +6,18 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
-import java.util.Random;
 
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import craftPlanner.Settings;
 import craftPlanner.GUI.actions.DraggableComponent;
 import craftPlanner.crafts.Item;
 import craftPlanner.crafts.ItemCost;
 import craftPlanner.crafts.Recipe;
 
 public class PlanNode extends DraggableComponent{
-    private static final Random random = new Random();
 
     private JTextField selectedIndecator;
     private JTextField recName;
@@ -36,7 +35,7 @@ public class PlanNode extends DraggableComponent{
     }
 
     private void setupFrame(){
-        this.setBounds(random.nextInt(0, 50),random.nextInt(0, 50),100,100);
+        this.setBounds(0,0,100,100);
         this.setOpaque(false);
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setBorder(BorderFactory.createEmptyBorder(2,2,2,2));
@@ -154,7 +153,7 @@ public class PlanNode extends DraggableComponent{
             }
             info = "Craft Successful";
             String str = String.valueOf(craftCount);
-            str = str.substring(0,Math.min(str.length()-1, 8));
+            str = str.substring(0,Math.min(str.length(), 8));
             craftCountText.setText(str);
             return true;
         }
@@ -185,9 +184,11 @@ public class PlanNode extends DraggableComponent{
                 }
             }
         }
+        if(Settings.requireRoundCrafts)
+            craftCount = Math.ceil(craftCount);
         updateDownstream();
         String str = String.valueOf(craftCount);
-        str = str.substring(0,Math.min(str.length()-1, 8));
+        str = str.substring(0,Math.min(str.length(), 8));
         craftCountText.setText(str);
         for (NodeConnection nodeConnection : incomingConnections) {
             if(!nodeConnection.from.update(layer+1)){

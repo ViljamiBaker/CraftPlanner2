@@ -322,7 +322,7 @@ public class PlanNodeEditor extends JPanel implements ActionListener{
             machine.setText("null");
         }
         String str = String.valueOf(n.r.craftTime());
-        str = str.substring(0,Math.min(str.length()-1, 8));
+        str = str.substring(0,Math.min(str.length(), 8));
         time.setText(str);
         this.repaint();
         producingFeild.setText("Crafting: " + n.craftCount);

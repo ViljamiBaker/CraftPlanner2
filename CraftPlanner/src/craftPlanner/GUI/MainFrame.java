@@ -54,7 +54,7 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
         this.setJMenuBar(setupMenu());
         this.setContentPane(createContentPane());
         this.setVisible(true);
-        this.setSize(1000, 600);
+        this.setSize(1400, 800);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setResizable(true);
         this.setMinimumSize(new Dimension(600, 400));
@@ -71,6 +71,7 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
         Registry.createRecipe(Registry.createItemCosts("1 Ore, 2 Coal"), Registry.createItemCosts("1 Iron"));
         Registry.createRecipe(Registry.createItemCosts(""), Registry.createItemCosts("3 Ore"));
         Registry.createRecipe(Registry.createItemCosts(""), Registry.createItemCosts("4 Coal"));
+        Settings.autoCreateItems = false;
     }
 
     public Container createContentPane() {
@@ -213,6 +214,7 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
         menu.add(createMenuItem("Create Machine", Actions.CREATE_MACHINE, KeyEvent.VK_M));
         menu.add(createMenuItem("Create Machine Recipe", Actions.CREATE_MACHINE_RECIPE, KeyEvent.VK_T));
         menu.add(createCheckbox("Automatically Add Items", "AutoAdd", KeyEvent.VK_A));
+        menu.add(createCheckbox("Require Round Crafts", "ReqRound", KeyEvent.VK_E));
         return menuBar;
     }
 
@@ -325,6 +327,9 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
         switch (source.getActionCommand()) {
             case "AutoAdd":
                 Settings.autoCreateItems = !Settings.autoCreateItems;
+                break;
+            case "ReqRound":
+                Settings.requireRoundCrafts = !Settings.requireRoundCrafts;
                 break;
         
             default:
