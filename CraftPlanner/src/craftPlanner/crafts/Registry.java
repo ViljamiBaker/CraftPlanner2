@@ -9,7 +9,7 @@ import craftPlanner.GUI.planning.PlanNode;
 
 public class Registry {
     public static ArrayList<Item> items = new ArrayList<>();
-    public static ArrayList<Recipe> Recipes = new ArrayList<>();
+    public static ArrayList<Recipe> recipes = new ArrayList<>();
     public static ArrayList<Machine> machines = new ArrayList<>();
 
     public static Item getItem(Item i){
@@ -32,7 +32,7 @@ public class Registry {
     public static void removeItem(Item item){
         items.remove(item);
         ArrayList<Recipe> RecipesToRemove = new ArrayList<>();
-        for (Recipe r : Recipes) {
+        for (Recipe r : recipes) {
             if(r.producesItem(item)||r.requiresItem(item))
                 RecipesToRemove.add(r);
         }
@@ -53,7 +53,7 @@ public class Registry {
     }
 
     public static Recipe getRecipe(Recipe Recipe){
-        for (Recipe r : Recipes) {
+        for (Recipe r : recipes) {
             if(Recipe.equals(r))return r;
         }
         return null;
@@ -66,12 +66,12 @@ public class Registry {
         Recipe Recipe = new Recipe(requirements, products, m, (m==null?-1.0:craftTime));
         Recipe oldRecipe = getRecipe(Recipe);
         if(oldRecipe!=null) return oldRecipe;
-        Recipes.add(Recipe);
+        recipes.add(Recipe);
         MainFrame.mainFrame.updateRegistery();
         return Recipe;
     }
     public static void removeRecipe(Recipe r){
-        Recipes.remove(r);
+        recipes.remove(r);
         for (PlanNode n : PlanFrame.planFrame.nodes) {
             if(n.r.equals(r))
                 PlanFrame.planFrame.removePlanNode(n);
@@ -102,7 +102,7 @@ public class Registry {
     public static void removeMachine(Machine m){
         machines.remove(m);
         ArrayList<Recipe> recipesToRemove = new ArrayList<>();
-        for (Recipe r : Recipes) {
+        for (Recipe r : recipes) {
             if(!r.isMachineRecipe()) continue;
             if(r.machine().equals(m))
                 recipesToRemove.add(r);

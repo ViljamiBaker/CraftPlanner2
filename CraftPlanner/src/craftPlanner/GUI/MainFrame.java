@@ -11,6 +11,8 @@ import java.awt.event.InputEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
+import java.io.File;
+import javax.swing.filechooser.FileFilter;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -18,6 +20,7 @@ import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JMenu;
@@ -36,6 +39,8 @@ import craftPlanner.crafts.Item;
 import craftPlanner.crafts.Machine;
 import craftPlanner.crafts.Recipe;
 import craftPlanner.crafts.Registry;
+import craftPlanner.fileIO.FileIO;
+import craftPlanner.fileIO.FileIO.FileType;
 public class MainFrame extends JFrame implements ActionListener, ItemListener{
     public static MainFrame mainFrame;
     Keyboard keyboard;
@@ -46,6 +51,7 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
     JList<Machine> machineList;
     DefaultListModel<Machine> machineModel;
     JTextArea info;
+    JFileChooser chooser;
     public PlanFrame plan;
     public PlanNodeEditor editor;
     public MainFrame(){
@@ -58,6 +64,7 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setResizable(true);
         this.setMinimumSize(new Dimension(600, 400));
+        chooser = new JFileChooser();
 
         MainFrame.mainFrame = this;
 
@@ -153,13 +160,11 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
         JButton destroyButtonM = new JButton("Destroy");
         destroyButtonM.setActionCommand("DestroyMachine");
         destroyButtonM.addActionListener(this);
-
         buttonPaneM.add(destroyButtonM);
 
         JButton addButtonM = new JButton("Add");
         addButtonM.setActionCommand("AddMachine");
         addButtonM.addActionListener(this);
-
         buttonPaneM.add(addButtonM);
 
         MachinePane.add(MachineListScroll, BorderLayout.CENTER);
@@ -179,6 +184,7 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
         infoPane.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         info = new JTextArea();
         info.setText("Info goes here \n");
+        info.setRows(info.getRows()+2);
         info.setFocusable(false);
         info.setEditable(false);
         info.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
@@ -199,44 +205,6 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
         this.getGlassPane().setVisible(true);
 
         return contentPane;
-    }
-    // https://docs.oracle.com/javase/tutorial/uiswing/components/menu.html
-    private JMenuBar setupMenu(){
-        JMenuBar menuBar = new JMenuBar();
-        JMenu menu = new JMenu("Creation");
-        menu.setMnemonic(KeyEvent.VK_C);
-        menu.getAccessibleContext().setAccessibleDescription(
-                "The only menu in this program that has menu items");
-        menuBar.add(menu);
-
-        menu.add(createMenuItem("Create Item", Actions.CREATE_ITEM, KeyEvent.VK_I));
-        menu.add(createMenuItem("Create Recipe", Actions.CREATE_RECIPE, KeyEvent.VK_R));
-        menu.add(createMenuItem("Create Machine", Actions.CREATE_MACHINE, KeyEvent.VK_M));
-        menu.add(createMenuItem("Create Machine Recipe", Actions.CREATE_MACHINE_RECIPE, KeyEvent.VK_T));
-        menu.add(createCheckbox("Automatically Add Items", "AutoAdd", KeyEvent.VK_A));
-        menu.add(createCheckbox("Require Round Crafts", "ReqRound", KeyEvent.VK_E));
-        return menuBar;
-    }
-
-    private JMenuItem createMenuItem(String text, String action, int key){
-        JMenuItem  menuItem = new JMenuItem(text,key);
-        if(key!=0)
-            menuItem.setAccelerator(KeyStroke.getKeyStroke(key, InputEvent.ALT_DOWN_MASK));
-        menuItem.addActionListener(this);
-        menuItem.setActionCommand(action);
-        return menuItem;
-    }
-    private JCheckBoxMenuItem createCheckbox(String text, String action, int key){
-        JCheckBoxMenuItem  cbItem = new JCheckBoxMenuItem(text);
-        if(key!=0)
-            cbItem.setAccelerator(KeyStroke.getKeyStroke(key, InputEvent.ALT_DOWN_MASK));
-        cbItem.addItemListener(this);
-        cbItem.setActionCommand(action);
-        return cbItem;
-    }
-
-    public void addInfo(String e){
-        info.append(e + "\n");
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -265,11 +233,145 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
             case "DestroyMachine":
                 destroySelectedMachines();
                 break;
+
+
+            case "SaveReg":
+                file(true, FileType.REGISTRY);
+                break;
+            case "LoadReg":
+                file(false, FileType.REGISTRY);
+                break;
+            case "SavePlan":
+                file(true, FileType.PLAN);
+                break;
+            case "LoadPlan":
+                file(false, FileType.PLAN);
+                break;
+            case "SaveCombined":
+                file(true, FileType.COMBINED);
+                break;
+            case "LoadCombined":
+                file(false, FileType.COMBINED);
+                break;
             default:
                 System.err.println("Are you fucking stupid? " + e.getActionCommand());
                 break;
         }
-        //System.out.println(Thread.currentThread().getStackTrace()[1]);
+    }
+
+    public void file(boolean save, FileType type){
+        chooser.setAcceptAllFileFilterUsed(false);
+        for (FileFilter filter : chooser.getChoosableFileFilters()) {
+            chooser.removeChoosableFileFilter(filter);
+        }
+        chooser.removeChoosableFileFilter(FileIO.getPlanFilter());
+        switch (type) {
+            case REGISTRY:
+                chooser.addChoosableFileFilter(FileIO.getRegistryFilter());
+                break;
+            case PLAN:
+                chooser.addChoosableFileFilter(FileIO.getPlanFilter());
+                break;
+            case COMBINED:
+                chooser.addChoosableFileFilter(FileIO.getCombinedFilter());
+                break;
+        }
+        int returnVal = -1;
+        if(save){
+            returnVal = chooser.showSaveDialog(this);
+        }else{
+            returnVal = chooser.showOpenDialog(this);
+        }
+
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            File file = chooser.getSelectedFile();
+            try {
+                FileIO.file(file, save, type); 
+            } catch (Exception e) {
+                MainFrame.mainFrame.addInfo("File: " + (save? "Save": "Load") + " failed " + e.getMessage());
+            }
+            MainFrame.mainFrame.addInfo("File:" + (save? "Saving": "Loading") + " " + type.toString() + " to: " + file.getPath());
+        } else {
+            MainFrame.mainFrame.addInfo("File:" + (save? "Save": "Load") + " command cancelled by user");
+        }
+    }
+
+    private JMenuItem createMenuItem(String text, String action, int key){
+        return createMenuItem(text, action, key, InputEvent.ALT_DOWN_MASK);
+    }
+    private JMenuItem createMenuItem(String text, String action, int key, int modifiers){
+        JMenuItem  menuItem = new JMenuItem(text,key);
+        if(key!=0)
+            menuItem.setAccelerator(KeyStroke.getKeyStroke(key, modifiers));
+        menuItem.addActionListener(this);
+        menuItem.setActionCommand(action);
+        return menuItem;
+    }
+    private JCheckBoxMenuItem createCheckbox(String text, String action, int key){
+        JCheckBoxMenuItem  cbItem = new JCheckBoxMenuItem(text);
+        if(key!=0)
+            cbItem.setAccelerator(KeyStroke.getKeyStroke(key, InputEvent.ALT_DOWN_MASK));
+        cbItem.addItemListener(this);
+        cbItem.setActionCommand(action);
+        return cbItem;
+    }
+    
+    // https://docs.oracle.com/javase/tutorial/uiswing/components/menu.html
+    private JMenuBar setupMenu(){
+        JMenuBar menuBar = new JMenuBar();
+        JMenu creation = new JMenu("Creation");
+        creation.setMnemonic(KeyEvent.VK_C);
+        menuBar.add(creation);
+
+        creation.add(createMenuItem("Create Item", Actions.CREATE_ITEM, KeyEvent.VK_I));
+        creation.add(createMenuItem("Create Recipe", Actions.CREATE_RECIPE, KeyEvent.VK_R));
+        creation.add(createMenuItem("Create Machine", Actions.CREATE_MACHINE, KeyEvent.VK_M));
+        creation.add(createMenuItem("Create Machine Recipe", Actions.CREATE_MACHINE_RECIPE, KeyEvent.VK_T));
+        creation.addSeparator();
+        creation.add(createCheckbox("Automatically Add Items", "AutoAdd", KeyEvent.VK_A));
+        creation.add(createCheckbox("Require Round Crafts", "ReqRound", KeyEvent.VK_E));
+
+        JMenu file = new JMenu("File");
+        file.setMnemonic(KeyEvent.VK_F);
+        menuBar.add(file);
+        
+        file.add(createMenuItem("Save Registery", "SaveReg", KeyEvent.VK_S, InputEvent.SHIFT_DOWN_MASK));
+        file.add(createMenuItem("Load Registery", "LoadReg", KeyEvent.VK_L, InputEvent.SHIFT_DOWN_MASK));
+        file.addSeparator();
+        file.add(createMenuItem("Save Plan", "SavePlan", KeyEvent.VK_S, InputEvent.ALT_DOWN_MASK));
+        file.add(createMenuItem("Load Plan", "LoadPlan", KeyEvent.VK_L, InputEvent.ALT_DOWN_MASK));
+        file.addSeparator();
+        file.add(createMenuItem("Save Combined", "SaveCombined", KeyEvent.VK_S, InputEvent.ALT_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
+        file.add(createMenuItem("Load Combined", "LoadCombined", KeyEvent.VK_L, InputEvent.ALT_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
+        file.addSeparator();
+        file.add(createCheckbox("Remove Plan on Load", "RemPlan", 0));
+
+        return menuBar;
+    }
+    
+    public void itemStateChanged(ItemEvent e) {
+        JMenuItem source = (JMenuItem)(e.getSource());
+        switch (source.getActionCommand()) {
+            case "AutoAdd":
+                Settings.autoCreateItems = !Settings.autoCreateItems;
+                break;
+            case "ReqRound":
+                Settings.requireRoundCrafts = !Settings.requireRoundCrafts;
+                break;
+            case "RemPlan":
+                Settings.removePlanOnLoad = !Settings.removePlanOnLoad;
+                break;
+        
+            default:
+                System.err.println("Are you incredebly fucking stupid? " + source.getActionCommand());
+                break;
+        }
+    }
+
+    public void addInfo(String e){
+        info.append(e + "\n");
+        info.setRows(info.getRows()+1);
+        info.setColumns(Math.max(info.getColumns(), e.length()/2 + 2));
     }
 
     private void destroySelectedItems(){
@@ -309,7 +411,7 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
             listModel.addElement(i);
         }
         recipeModel.removeAllElements();
-        for (Recipe i : Registry.Recipes) {
+        for (Recipe i : Registry.recipes) {
             recipeModel.addElement(i);
         }
         machineModel.removeAllElements();
@@ -320,27 +422,6 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
 
     public void update(){
         keyboard.update();
-    }
-
-    public void itemStateChanged(ItemEvent e) {
-        JMenuItem source = (JMenuItem)(e.getSource());
-        switch (source.getActionCommand()) {
-            case "AutoAdd":
-                Settings.autoCreateItems = !Settings.autoCreateItems;
-                break;
-            case "ReqRound":
-                Settings.requireRoundCrafts = !Settings.requireRoundCrafts;
-                break;
-        
-            default:
-                System.err.println("Are you incredebly fucking stupid? " + source.getActionCommand());
-                break;
-        }
-    }
-    protected String getClassName(Object o) {
-        String classString = o.getClass().getName();
-        int dotIndex = classString.lastIndexOf(".");
-        return classString.substring(dotIndex+1);
     }
 
     public Item[] getSelectedItems(){

@@ -53,7 +53,7 @@ public class PlanFrame extends JPanel{
         public void paintChildren(Graphics2D g2d, PlanNode n1){
             Point center1 = SwingUtilities.convertPoint(n1, n1.getSize().width/2,n1.getSize().height/2, this.getParent());
             Point n1Min = SwingUtilities.convertPoint(n1, 0,0, this.getParent());
-            Point n1Max = new Point(n1Min.x + n1.getSize().width, n1Min.y + n1.getSize().width);
+            Point n1Max = new Point(n1Min.x + n1.getSize().width, n1Min.y + n1.getSize().height);
             for (NodeConnection c : n1.incomingConnections) {
                 PlanNode n2 = c.from;
                 Point center2 = SwingUtilities.convertPoint(n2, n2.getSize().width/2,n2.getSize().height/2, this.getParent());
@@ -107,24 +107,26 @@ public class PlanFrame extends JPanel{
         this.add(panelScroll,BorderLayout.CENTER);
         PlanFrame.planFrame = this;
     }
-
-    public void addPlanNode(Recipe r){
+    public PlanNode addPlanNode(Recipe r){
+        return addPlanNode(r, SwingUtilities.convertPoint(this, 10 + (nodes.size() % 10) * 10,10 + (nodes.size() % 10) * 6, panel));
+    }
+    public PlanNode addPlanNode(Recipe r, Point p){
         PlanNode node = new PlanNode(r);
         panel.add(node);
         panel.repaint();
         SwingUtilities.updateComponentTreeUI(panel);
         nodes.add(node);
-        node.setLocation(SwingUtilities.convertPoint(this, 10 + (nodes.size() % 10) * 10,10 + (nodes.size() % 10) * 6, panel));
-        //panel.setComponentZOrder(paintpanel, panel.getComponentCount() - 1);
+        node.setLocation(p);
+        return node;
     }
     public void removePlanNode(PlanNode n){
+        nodes.remove(n);
         // son im crine
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 panel.remove(n);
                 panel.repaint();
                 SwingUtilities.updateComponentTreeUI(panel);
-                nodes.remove(n);
                 if(n.equals(MainFrame.mainFrame.editor.selectedNode))
                     MainFrame.mainFrame.editor.deselectNode();
                 for (NodeConnection nc : n.incomingConnections) {

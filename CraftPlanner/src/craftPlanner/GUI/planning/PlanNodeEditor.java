@@ -83,10 +83,8 @@ public class PlanNodeEditor extends JPanel implements ActionListener{
         producingFeild = createTextFeild("Craft: 0.0",false,true);
         thisinfo = new GhostText(new JTextField(),"Info here");
         thisinfo.textfield.setEditable(false);
-        thisinfo.textfield.setFocusable(false);
         nodeinfo = new GhostText(new JTextField(),"Node info here");
         nodeinfo.textfield.setEditable(false);
-        nodeinfo.textfield.setFocusable(false);
         requestTextField = new GhostText(new JTextField(""), "Craft # Here");
         requestTextField.textfield.setEditable(true);
         
@@ -146,11 +144,11 @@ public class PlanNodeEditor extends JPanel implements ActionListener{
 
         c.gridx = 0;
         c.gridy = 4;
-        c.gridwidth = 4;
+        c.gridwidth = 6;
         panel.add(nodeinfo.textfield,c);
-        c.gridx = 4;
+        c.gridx = 6;
         c.gridy = 4;
-        c.gridwidth = 8;
+        c.gridwidth = 6;
         panel.add(thisinfo.textfield,c);
 
         c.gridx = 0;

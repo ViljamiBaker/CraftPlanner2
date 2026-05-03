@@ -5,10 +5,10 @@ import craftPlanner.crafts.ItemCost;
 // A: from PRODUCES cost.item
 // B: to CONSUMES cost.item
 public class NodeConnection {
-    PlanNode from;
-    PlanNode to;
-    ItemCost cost;
-    boolean fufilled = false;
+    public PlanNode from;
+    public PlanNode to;
+    public ItemCost cost;
+    public boolean fufilled = false;
     public NodeConnection(PlanNode from, PlanNode to, ItemCost cost){
         this.from = from;
         this.to = to;

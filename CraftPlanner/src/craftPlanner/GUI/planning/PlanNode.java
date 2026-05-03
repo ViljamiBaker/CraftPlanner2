@@ -20,6 +20,7 @@ import craftPlanner.crafts.Recipe;
 public class PlanNode extends DraggableComponent{
 
     private JTextField selectedIndecator;
+    private JTextField craftIndecator;
     private JTextField recName;
     private JTextField prodName;
     private JTextField craftCountText;
@@ -35,34 +36,55 @@ public class PlanNode extends DraggableComponent{
     }
 
     private void setupFrame(){
-        this.setBounds(0,0,100,100);
+        this.setBounds(0,0,120,100);
         this.setOpaque(false);
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setBorder(BorderFactory.createEmptyBorder(2,2,2,2));
         GridBagConstraints c = new GridBagConstraints();
-        panel.setSize(100,100);
+        panel.setSize(120,100);
         panel.setBackground(new Color(80,80,80));
+
         selectedIndecator = new JTextField("Deselected");
         selectedIndecator.setBackground(Color.RED);
         selectedIndecator.setEditable(false);
         selectedIndecator.setFocusable(false);
         selectedIndecator.setBorder(BorderFactory.createLineBorder(Color.GRAY, 3));
         selectedIndecator.setHorizontalAlignment(JTextField.CENTER);
+        selectedIndecator.addMouseListener(this);
+        selectedIndecator.addMouseMotionListener(this);
+
+        craftIndecator = new JTextField("Sad");
+        craftIndecator.setBackground(Color.RED);
+        craftIndecator.setEditable(false);
+        craftIndecator.setFocusable(false);
+        craftIndecator.setBorder(BorderFactory.createLineBorder(Color.GRAY, 3));
+        craftIndecator.setHorizontalAlignment(JTextField.CENTER);
+        craftIndecator.addMouseListener(this);
+        craftIndecator.addMouseMotionListener(this);
+
         JPanel otherStuffPanel = new JPanel(new GridBagLayout());
         otherStuffPanel.setBackground(Color.GRAY);
 
         c.insets = new Insets(2,2,2,2);
-        c.weightx = 1.0;
         c.weighty = 1.0;
         c.fill = GridBagConstraints.BOTH;
         c.anchor = GridBagConstraints.CENTER;
         c.gridy = 0;
         c.gridwidth = 1;
         c.weighty = 0.07;
+        c.weightx = 0.7;
         panel.add(selectedIndecator,c);
-        c.gridy = 1;
+        c.gridx = 1;
+        c.gridy = 0;
         c.gridwidth = 1;
+        c.weighty = 0.07;
+        c.weightx = 0.3;
+        panel.add(craftIndecator,c);
+        c.gridx = 0;
+        c.gridy = 1;
+        c.gridwidth = 2;
         c.weighty = 0.93;
+        c.weightx = 1.0;
         panel.add(otherStuffPanel,c);
 
         c.weighty = 1.0;
@@ -80,9 +102,6 @@ public class PlanNode extends DraggableComponent{
         c.gridwidth = 1;
         otherStuffPanel.add(craftCountText,c);
 
-        selectedIndecator.addMouseListener(this);
-        selectedIndecator.addMouseMotionListener(this);
-
         this.add(panel);
         this.repaint();
     }
@@ -97,14 +116,14 @@ public class PlanNode extends DraggableComponent{
 
     public Recipe r;
 
-    double craftCount = -1.0;
+    public double craftCount = -1.0;
     int layer = -1;
 
     boolean isSelected = false;
     String info = "";
 
-    ArrayList<NodeConnection> incomingConnections = new ArrayList<>();
-    ArrayList<NodeConnection> outgoingConnections = new ArrayList<>();
+    public ArrayList<NodeConnection> incomingConnections = new ArrayList<>();
+    public ArrayList<NodeConnection> outgoingConnections = new ArrayList<>();
 
     public PlanNode(Recipe r){
         this.r = r;
@@ -139,71 +158,89 @@ public class PlanNode extends DraggableComponent{
 
     public boolean update(int layer){
         if(this.layer != layer+1) return true;
-        if(isParent()){
-            if(craftCount <= 0.0){
-                info = "Craft Failed";
-                return false;
-            }
-            updateDownstream();
-            for (NodeConnection nodeConnection : incomingConnections) {
-                if(!nodeConnection.from.update(layer+1)){
-                    info = "Craft Failed";
-                    return false;
-                }
-            }
-            info = "Craft Successful";
-            String str = String.valueOf(craftCount);
-            str = str.substring(0,Math.min(str.length(), 8));
-            craftCountText.setText(str);
-            return true;
-        }
-        ItemCost[] crafting = new ItemCost[r.products().length];
-        for (int i = 0; i < crafting.length; i++) {
-            crafting[i] = new ItemCost(r.products()[i].item(),0);
-        }
-        for (NodeConnection nc : outgoingConnections) {
+        if(!isParent()){
+            ItemCost[] crafting = new ItemCost[r.products().length];
             for (int i = 0; i < crafting.length; i++) {
-                if(!crafting[i].item().equals(nc.cost.item())) continue;
-                crafting[i].setCost(crafting[i].cost()+nc.cost.cost());
+                crafting[i] = new ItemCost(r.products()[i].item(),0);
             }
-            nc.fufilled = true;
-        }
-        craftCount = -1.0;
-        for (int i = 0; i < crafting.length; i++) {
-            double count = crafting[i].cost();
-            if(r.isMachineRecipe()){
-                // treat c.cost as items/s for this
-                double production = r.getProduction(crafting[i].item())/r.craftTime() * craftCount;
-                if(production<count){
-                    craftCount = crafting[i].cost() / r.getProduction(crafting[i].item()) * r.craftTime();
-                }
-            }else{
-                double production = r.getProduction(crafting[i].item()) * craftCount;
-                if(production<count){
-                    craftCount = crafting[i].cost() / r.getProduction(crafting[i].item());
+            for (NodeConnection nc : outgoingConnections) {
+                for (int i = 0; i < crafting.length; i++) {
+                    if(!crafting[i].item().equals(nc.cost.item())) continue;
+                    crafting[i].setCost(crafting[i].cost()+nc.cost.cost());
                 }
             }
+            craftCount = -1.0;
+            for (int i = 0; i < crafting.length; i++) {
+                double count = crafting[i].cost();
+                if(r.isMachineRecipe()){
+                    // treat c.cost as items/s for this
+                    double production = r.getProduction(crafting[i].item())/r.craftTime() * craftCount;
+                    if(production<count){
+                        craftCount = crafting[i].cost() / r.getProduction(crafting[i].item()) * r.craftTime();
+                    }
+                }else{
+                    double production = r.getProduction(crafting[i].item()) * craftCount;
+                    if(production<count){
+                        craftCount = crafting[i].cost() / r.getProduction(crafting[i].item());
+                    }
+                }
+            }
+            if(Settings.requireRoundCrafts)
+                craftCount = Math.ceil(craftCount);
         }
-        if(Settings.requireRoundCrafts)
-            craftCount = Math.ceil(craftCount);
         updateDownstream();
-        String str = String.valueOf(craftCount);
-        str = str.substring(0,Math.min(str.length(), 8));
-        craftCountText.setText(str);
+        setCraftCountText();
         for (NodeConnection nodeConnection : incomingConnections) {
             if(!nodeConnection.from.update(layer+1)){
-                info = "Craft Failed";
+                info = "Earlier Step Failed";
+                craftStatus(CraftStatus.EARLIER);
                 return false;
+            }
+        }
+        ArrayList<ItemCost> item = new ArrayList<>();
+        for (ItemCost c : r.requirements()) {
+            item.add(c);
+        }
+        for (NodeConnection nodeConnection : incomingConnections) {
+            if(nodeConnection.fufilled){
+                for (int i = 0; i < item.size(); i++) {
+                    if(item.get(i).item().equals(nodeConnection.cost.item())){
+                        item.remove(i);
+                        break;
+                    }
+                }
+            }
+        }
+        if(item.size()>0){
+            info = "Not Enough Resources: " + Recipe.CreateRecipeString(item.toArray(new ItemCost[0]));
+            craftStatus(CraftStatus.BAD);
+            return false;
+        }
+        if(!isParent()){
+            for (NodeConnection nc : outgoingConnections) {
+                nc.fufilled = true;
             }
         }
         info = "Craft Successful";
+        craftStatus(CraftStatus.GOOD);
         return true;
+    }
+
+    public void setCraftCountText(){
+        String str = String.valueOf(craftCount);
+        str = str.substring(0,Math.min(str.length(), 8));
+        craftCountText.setText(str);
     }
 
     public enum SelectStatus{
         NONE,
         SLECTED,
         CONNECTING
+    }
+    public enum CraftStatus{
+        BAD,
+        GOOD,
+        EARLIER
     }
 
     public void select(SelectStatus status){
@@ -225,6 +262,28 @@ public class PlanNode extends DraggableComponent{
         }
         selectedIndecator.setBackground(newcolor);
         selectedIndecator.setText(newStatus);
+        this.repaint();
+    }
+
+        public void craftStatus(CraftStatus status){
+        Color newcolor = null;
+        String newStatus = "";
+        switch (status) {
+            case BAD:
+                newcolor = Color.RED;
+                newStatus = "Bad";
+                break;
+            case GOOD:
+                newcolor = Color.GREEN;
+                newStatus = "Good";
+                break;
+            case EARLIER:
+                newcolor = Color.YELLOW;
+                newStatus = "Earlier";
+                break;
+        }
+        craftIndecator.setBackground(newcolor);
+        craftIndecator.setText(newStatus);
         this.repaint();
     }
 
