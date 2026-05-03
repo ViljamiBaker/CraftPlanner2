@@ -3,7 +3,7 @@ package craftPlanner.crafts;
 import java.util.Arrays;
 
 public record Recipe(ItemCost[] requirements, ItemCost[] products, Machine machine, double craftTime) {
-    public boolean MachineRecipe(){
+    public boolean isMachineRecipe(){
         return this.machine()!=null;
     }
     @Override
@@ -11,17 +11,20 @@ public record Recipe(ItemCost[] requirements, ItemCost[] products, Machine machi
         if(!(o instanceof Recipe)) return false;
         Recipe r = (Recipe)o;
         boolean machineEquals;
-        if(this.MachineRecipe())
+        if(this.isMachineRecipe())
             machineEquals = this.machine.equals(r.machine) && (this.craftTime == r.craftTime);
         else
-            machineEquals = !r.MachineRecipe();
+            machineEquals = !r.isMachineRecipe();
         return machineEquals && Arrays.equals(this.requirements, r.requirements) && Arrays.equals(this.products, r.products);
     }
-    public boolean usesItem(Item i){
-        for (ItemCost itemCost : products) {
+    public boolean requiresItem(Item i){
+        for (ItemCost itemCost : requirements) {
             if(itemCost.item().equals(i))return true;
         }
-        for (ItemCost itemCost : requirements) {
+        return false;
+    }
+    public boolean producesItem(Item i){
+        for (ItemCost itemCost : products) {
             if(itemCost.item().equals(i))return true;
         }
         return false;
@@ -42,7 +45,7 @@ public record Recipe(ItemCost[] requirements, ItemCost[] products, Machine machi
     public static String CreateRecipeString(ItemCost[] requirements) {
         int iMax = requirements.length - 1;
         if (iMax == -1)
-            return null;
+            return "Nothing";
 
         StringBuilder b = new StringBuilder();
         b.append('[');

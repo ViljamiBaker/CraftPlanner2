@@ -4,6 +4,8 @@ import java.util.ArrayList;
 
 import craftPlanner.Settings;
 import craftPlanner.GUI.MainFrame;
+import craftPlanner.GUI.planning.PlanFrame;
+import craftPlanner.GUI.planning.PlanNode;
 
 public class Registry {
     public static ArrayList<Item> items = new ArrayList<>();
@@ -31,7 +33,7 @@ public class Registry {
         items.remove(item);
         ArrayList<Recipe> RecipesToRemove = new ArrayList<>();
         for (Recipe r : Recipes) {
-            if(r.usesItem(item))
+            if(r.producesItem(item)||r.requiresItem(item))
                 RecipesToRemove.add(r);
         }
         for (Recipe r : RecipesToRemove){
@@ -59,8 +61,9 @@ public class Registry {
     public static Recipe createRecipe(ItemCost[] requirements, ItemCost[] products){
         return createMachineRecipe(requirements, products, null, -1.0);
     }
-    public static Recipe createMachineRecipe(ItemCost[] requirements, ItemCost[] products, Machine machine, double craftTime){
-        Recipe Recipe = new Recipe(requirements, products, machine, craftTime);
+    public static Recipe createMachineRecipe(ItemCost[] requirements, ItemCost[] products, String machine, double craftTime){
+        Machine m = getMachine(machine);
+        Recipe Recipe = new Recipe(requirements, products, m, (m==null?-1.0:craftTime));
         Recipe oldRecipe = getRecipe(Recipe);
         if(oldRecipe!=null) return oldRecipe;
         Recipes.add(Recipe);
@@ -69,6 +72,10 @@ public class Registry {
     }
     public static void removeRecipe(Recipe r){
         Recipes.remove(r);
+        for (PlanNode n : PlanFrame.planFrame.nodes) {
+            if(n.r.equals(r))
+                PlanFrame.planFrame.removePlanNode(n);
+        }
     }
 
     // assume all machines with the same name are the same, 
@@ -94,13 +101,16 @@ public class Registry {
     }
     public static void removeMachine(Machine m){
         machines.remove(m);
-        ArrayList<Recipe> RecipesToRemove = new ArrayList<>();
+        ArrayList<Recipe> recipesToRemove = new ArrayList<>();
         for (Recipe r : Recipes) {
+            if(!r.isMachineRecipe()) continue;
             if(r.machine().equals(m))
-                RecipesToRemove.add(r);
+                recipesToRemove.add(r);
         }
-        for (Recipe r : RecipesToRemove) 
+        for (Recipe r : recipesToRemove){
+            MainFrame.mainFrame.addInfo("Info: Removing recipe \"" + r + "\"");
             removeRecipe(r);
+        }
     }
 
     public static ItemCost[] createItemCosts(String str){

@@ -97,4 +97,14 @@ public class GhostText implements FocusListener, DocumentListener, PropertyChang
     public void removeUpdate(DocumentEvent e) {
         updateState();
     }
+    public void setText(String s){
+        updateState();
+        if(s.isEmpty()){
+            textfield.setText(ghostText);
+            textfield.setForeground(ghostColor);
+        }else{
+            textfield.setText(s);
+            textfield.setForeground(Color.BLACK);
+        }
+    }
 }

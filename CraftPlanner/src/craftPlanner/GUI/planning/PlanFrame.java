@@ -12,6 +12,7 @@ import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 
 import craftPlanner.GUI.Keyboard;
+import craftPlanner.GUI.MainFrame;
 import craftPlanner.crafts.Recipe;
 
 public class PlanFrame extends JPanel{
@@ -32,7 +33,7 @@ public class PlanFrame extends JPanel{
     Keyboard keyboard;
     JPanel panel;
     PlanPanel paintpanel;
-    ArrayList<PlanNode> nodes = new ArrayList<>();
+    public ArrayList<PlanNode> nodes = new ArrayList<>();
 
     public PlanFrame(Keyboard keyboard){
         this.setVisible(true);
@@ -64,13 +65,20 @@ public class PlanFrame extends JPanel{
         nodes.add(node);
     }
     public void removePlanNode(PlanNode n){
-        panel.remove(n);
-        panel.repaint();
-        SwingUtilities.updateComponentTreeUI(panel);
-        nodes.remove(n);
+        // son im crine
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                panel.remove(n);
+                panel.repaint();
+                SwingUtilities.updateComponentTreeUI(panel);
+                nodes.remove(n);
+                if(MainFrame.mainFrame.editor.selectedNode.equals(n))
+                MainFrame.mainFrame.editor.deselectNode();
+            }
+        });
     }
 
-    public void updateAll(){
+    public void updateAllLayers(){
         // layers
         for (PlanNode planNode : nodes) {
             planNode.layer = -1;
@@ -80,11 +88,11 @@ public class PlanFrame extends JPanel{
                 planNode.updateLayer(-1);
             }
         }
-        // update
-        for (PlanNode planNode : nodes) {
-            if(planNode.isParent()){
-                planNode.update(-1);
-            }
-        }
+        //// update
+        //for (PlanNode planNode : nodes) {
+        //    if(planNode.isParent()){
+        //        planNode.update(-1);
+        //    }
+        //}
     }
 }

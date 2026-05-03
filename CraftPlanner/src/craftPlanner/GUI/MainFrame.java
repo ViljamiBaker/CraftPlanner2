@@ -3,6 +3,7 @@ package craftPlanner.GUI;
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.GridLayout;
 import java.util.List;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -30,6 +31,7 @@ import javax.swing.KeyStroke;
 import craftPlanner.Settings;
 import craftPlanner.GUI.actions.Actions;
 import craftPlanner.GUI.planning.PlanFrame;
+import craftPlanner.GUI.planning.PlanNodeEditor;
 import craftPlanner.crafts.Item;
 import craftPlanner.crafts.Recipe;
 import craftPlanner.crafts.Registry;
@@ -42,6 +44,7 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
     DefaultListModel<Recipe> RecipeModel;
     JTextArea info;
     PlanFrame plan;
+    public PlanNodeEditor editor;
     public MainFrame(){
         keyboard = new Keyboard(this);
         this.setTitle("calculating");
@@ -56,9 +59,15 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
         MainFrame.mainFrame = this;
 
         Settings.autoCreateItems = true;
-        Registry.createRecipe(Registry.createItemCosts("1 Ore, 1 Coal"), Registry.createItemCosts("1 Iron"));
-        Registry.createRecipe(Registry.createItemCosts(""), Registry.createItemCosts("1 Ore"));
-        Registry.createRecipe(Registry.createItemCosts(""), Registry.createItemCosts("1 Coal"));
+        Registry.createMachine("Miner",Registry.createItemCosts("100 Energy"));
+        Registry.createMachine("Furnace",Registry.createItemCosts("1500 Energy"));
+        Registry.createMachineRecipe(Registry.createItemCosts("1 Ore, 2 Coal"), Registry.createItemCosts("1 Iron"), "Furnace", 5.0);
+        Registry.createMachineRecipe(Registry.createItemCosts(""), Registry.createItemCosts("1 Ore"), "Miner", 15.0);
+        Registry.createMachineRecipe(Registry.createItemCosts(""), Registry.createItemCosts("4 Coal"), "Miner", 12.0);
+        Registry.createMachineRecipe(Registry.createItemCosts("1 Iron"), Registry.createItemCosts(""), "Miner", 1.0);
+        Registry.createRecipe(Registry.createItemCosts("1 Ore, 2 Coal"), Registry.createItemCosts("1 Iron"));
+        Registry.createRecipe(Registry.createItemCosts(""), Registry.createItemCosts("3 Ore"));
+        Registry.createRecipe(Registry.createItemCosts(""), Registry.createItemCosts("4 Coal"));
     }
 
     public Container createContentPane() {
@@ -75,7 +84,7 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
         itemlist.setVisibleRowCount(-1);
         JScrollPane itemListScroll = new JScrollPane(itemlist);
         itemListScroll.setPreferredSize(new Dimension(200, 800));
-        itemListScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        itemListScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         itemListScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
         JPanel buttonPane = new JPanel();
@@ -101,7 +110,7 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
         RecipeList.setVisibleRowCount(-1);
         JScrollPane RecipeListScroll = new JScrollPane(RecipeList);
         RecipeListScroll.setPreferredSize(new Dimension(200, 800));
-        RecipeListScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        RecipeListScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         RecipeListScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
         JPanel buttonPaneR = new JPanel();
@@ -124,6 +133,9 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
         RecipePane.add(RecipeListScroll, BorderLayout.CENTER);
         RecipePane.add(buttonPaneR,BorderLayout.PAGE_END);
         contentPane.add(RecipePane, BorderLayout.LINE_START);
+        
+        GridLayout experimentLayout = new GridLayout(1,2);
+        JPanel bottomComponent = new JPanel(experimentLayout);
 
         JPanel infoPane = new JPanel(new BorderLayout(5,5));
         infoPane.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
@@ -135,10 +147,15 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
         info.setPreferredSize(new Dimension(800, 150));
         JScrollPane infoScroll = new JScrollPane(info);
         infoScroll.setPreferredSize(new Dimension(1000, 150));
-        infoScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        infoScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         infoScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         infoPane.add(infoScroll, BorderLayout.CENTER);
-        contentPane.add(infoPane, BorderLayout.PAGE_END);
+
+        editor = new PlanNodeEditor();
+
+        bottomComponent.add(infoScroll);
+        bottomComponent.add(editor);
+        contentPane.add(bottomComponent, BorderLayout.PAGE_END);
 
         return contentPane;
     }
@@ -256,5 +273,9 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
         String classString = o.getClass().getName();
         int dotIndex = classString.lastIndexOf(".");
         return classString.substring(dotIndex+1);
+    }
+
+    public Item[] getSelectedItems(){
+        return itemlist.getSelectedValuesList().toArray(new Item[0]);
     }
 }

@@ -2,8 +2,6 @@ package craftPlanner.GUI.actions;
 
 import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -17,7 +15,6 @@ public class DraggableComponent
     private volatile int screenY = 0;
     private volatile int myX = 0;
     private volatile int myY = 0;
-    public volatile double scale = 1.0;
     protected volatile int minlayer = 0;
 
     public DraggableComponent() {
@@ -72,17 +69,9 @@ public class DraggableComponent
     @Override
     public void mouseExited(MouseEvent e) { }
 
-    @Override
-    public void paint(Graphics g){
-        Graphics2D g2d = (Graphics2D)g;
-        g2d.scale(scale, scale);
-        super.paint(g2d);
-    }
-
     public void moveTo(int idx){
         Container parent = this.getParent();
         if(parent == null) return;
         parent.setComponentZOrder(this, idx);
-        parent.repaint();
     }
 }
