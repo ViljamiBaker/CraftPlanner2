@@ -67,18 +67,18 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
         chooser = new JFileChooser();
 
         MainFrame.mainFrame = this;
-
-        Settings.autoCreateItems = true;
-        Registry.createMachine("Miner",Registry.createItemCosts("100 Energy"));
-        Registry.createMachine("Furnace",Registry.createItemCosts("1500 Energy"));
-        Registry.createMachineRecipe(Registry.createItemCosts("1 Ore, 2 Coal"), Registry.createItemCosts("1 Iron"), "Furnace", 5.0);
-        Registry.createMachineRecipe(Registry.createItemCosts(""), Registry.createItemCosts("1 Ore"), "Miner", 15.0);
-        Registry.createMachineRecipe(Registry.createItemCosts(""), Registry.createItemCosts("4 Coal"), "Miner", 12.0);
-        Registry.createMachineRecipe(Registry.createItemCosts("1 Iron"), Registry.createItemCosts(""), "Miner", 1.0);
-        Registry.createRecipe(Registry.createItemCosts("1 Ore, 2 Coal"), Registry.createItemCosts("1 Iron"));
-        Registry.createRecipe(Registry.createItemCosts(""), Registry.createItemCosts("3 Ore"));
-        Registry.createRecipe(Registry.createItemCosts(""), Registry.createItemCosts("4 Coal"));
-        Settings.autoCreateItems = false;
+        
+        //Settings.autoCreateItems = true;
+        //Registry.createMachine("Miner",Registry.createItemCosts("100 Energy"));
+        //Registry.createMachine("Furnace",Registry.createItemCosts("1500 Energy"));
+        //Registry.createMachineRecipe(Registry.createItemCosts("1 Ore, 2 Coal"), Registry.createItemCosts("1 Iron"), "Furnace", 5.0);
+        //Registry.createMachineRecipe(Registry.createItemCosts(""), Registry.createItemCosts("1 Ore"), "Miner", 15.0);
+        //Registry.createMachineRecipe(Registry.createItemCosts(""), Registry.createItemCosts("4 Coal"), "Miner", 12.0);
+        //Registry.createMachineRecipe(Registry.createItemCosts("1 Iron"), Registry.createItemCosts(""), "Miner", 1.0);
+        //Registry.createRecipe(Registry.createItemCosts("1 Ore, 2 Coal"), Registry.createItemCosts("1 Iron"));
+        //Registry.createRecipe(Registry.createItemCosts(""), Registry.createItemCosts("3 Ore"));
+        //Registry.createRecipe(Registry.createItemCosts(""), Registry.createItemCosts("4 Coal"));
+        //Settings.autoCreateItems = false;
     }
 
     public Container createContentPane() {
