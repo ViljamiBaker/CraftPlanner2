@@ -37,6 +37,7 @@ public class PlanNodeEditor extends JPanel implements ActionListener{
     JTextField producingFeild;
     JTextField machine;
     JTextField time;
+    JTextField nametext;
     GhostText requestTextField;
 
     private JButton createButton(String name, String action){
@@ -68,14 +69,16 @@ public class PlanNodeEditor extends JPanel implements ActionListener{
         connectButton.getActionMap().put("CONNECT", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                connectButton.doClick(); // Simulates a physical click
+                connectButton.doClick();
             }
         });
         JButton disconnectButton = createButton("Disconnect", "Disconnect");
+        nametext = createTextFeild("", false, true);
+        JTextField infoname = createTextFeild("Name: ", false, false);
         requirements = createTextFeild("", false, true);
-        JTextField inforeq = createTextFeild("Products: ", false, false);
+        JTextField inforeq = createTextFeild("Requirements: ", false, false);
         products = createTextFeild("", false, true);
-        JTextField infoprod = createTextFeild("Requirements: ", false, false);
+        JTextField infoprod = createTextFeild("Products: ", false, false);
         machine = createTextFeild("",false,true);
         JTextField infopmac = createTextFeild("Machine: ", false, false);
         time = createTextFeild("",false,true);
@@ -96,12 +99,12 @@ public class PlanNodeEditor extends JPanel implements ActionListener{
         c.gridx = 0;
         c.gridy = 0;
         c.gridwidth = 2;
-        panel.add(infoprod,c);
+        panel.add(infoname,c);
         c.gridx = 2;
         c.gridy = 0;
         c.gridwidth = 10;
         c.gridheight = 1;
-        panel.add(requirements,c);
+        panel.add(nametext,c);
 
         c.gridx = 0;
         c.gridy = 1;
@@ -110,57 +113,67 @@ public class PlanNodeEditor extends JPanel implements ActionListener{
         c.gridx = 2;
         c.gridy = 1;
         c.gridwidth = 10;
-        panel.add(products,c);
+        c.gridheight = 1;
+        panel.add(requirements,c);
 
         c.gridx = 0;
         c.gridy = 2;
         c.gridwidth = 2;
-        panel.add(infopmac,c);
+        panel.add(infoprod,c);
         c.gridx = 2;
         c.gridy = 2;
+        c.gridwidth = 10;
+        panel.add(products,c);
+
+        c.gridx = 0;
+        c.gridy = 3;
+        c.gridwidth = 2;
+        panel.add(infopmac,c);
+        c.gridx = 2;
+        c.gridy = 3;
         c.gridwidth = 4;
         panel.add(machine,c);
         c.gridx = 6;
-        c.gridy = 2;
+        c.gridy = 3;
         c.gridwidth = 2;
         panel.add(infoptime,c);
         c.gridx = 8;
-        c.gridy = 2;
+        c.gridy = 3;
         c.gridwidth = 4;
         panel.add(time,c);
 
         c.gridx = 0;
-        c.gridy = 3;
+        c.gridy = 4;
         c.gridwidth = 4;
         panel.add(producingFeild,c);
         c.gridx = 4;
-        c.gridy = 3;
+        c.gridy = 4;
         c.gridwidth = 4;
         panel.add(requestButton,c);
         c.gridx = 8;
-        c.gridy = 3;
+        c.gridy = 4;
         c.gridwidth = 4;
         panel.add(requestTextField.textfield,c);
 
         c.gridx = 0;
-        c.gridy = 4;
+        c.gridy = 5;
         c.gridwidth = 6;
         panel.add(nodeinfo.textfield,c);
         c.gridx = 6;
-        c.gridy = 4;
+        c.gridy = 5;
         c.gridwidth = 6;
         panel.add(thisinfo.textfield,c);
 
         c.gridx = 0;
-        c.gridy = 5;
+        c.gridy = 6;
         c.gridwidth = 4;
         panel.add(button,c);
         c.gridx = 4;
-        c.gridy = 5;
+        c.gridy = 6;
         c.gridwidth = 4;
         panel.add(connectButton,c);
         c.gridx = 8;
-        c.gridy = 5;
+        c.gridy = 6;
         c.gridwidth = 4;
         panel.add(disconnectButton,c);
         this.add(panel);
@@ -324,6 +337,11 @@ public class PlanNodeEditor extends JPanel implements ActionListener{
         time.setText(str);
         this.repaint();
         producingFeild.setText("Crafting: " + n.craftCount);
+        if(n.r.name().length()==0){
+            nametext.setText("");
+        }else{
+            nametext.setText(n.r.name());
+        }
     }
 
     public void deselectNode(){
@@ -334,6 +352,7 @@ public class PlanNodeEditor extends JPanel implements ActionListener{
         producingFeild.setText("");
         machine.setText("");
         time.setText("");
+        nametext.setText("");
         this.repaint();
     }
 }

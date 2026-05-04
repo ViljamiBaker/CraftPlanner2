@@ -2,9 +2,21 @@ package craftPlanner.crafts;
 
 import java.util.Arrays;
 
-public record Recipe(ItemCost[] requirements, ItemCost[] products, Machine machine, double craftTime) {
+public class Recipe {
+    private ItemCost[] requirements;
+    private ItemCost[] products;
+    private Machine machine;
+    private double craftTime;
+    private String name;
+    public Recipe(ItemCost[] requirements, ItemCost[] products, Machine machine, double craftTime, String name){
+        this.requirements = requirements;
+        this.products = products;
+        this.machine = machine;
+        this.craftTime = craftTime;
+        this.name = name;
+    }
     public boolean isMachineRecipe(){
-        return this.machine()!=null;
+        return this.machine!=null;
     }
     @Override
     public boolean equals(Object o){
@@ -30,7 +42,11 @@ public record Recipe(ItemCost[] requirements, ItemCost[] products, Machine machi
         return false;
     }
     @Override
-    public String toString(){
+    public final String toString() {
+        if(name.length() == 0) return toLongString();
+        return name;
+    }
+    public String toLongString(){
         String recString = Recipe.CreateRecipeString(requirements);
         String prodString = Recipe.CreateRecipeString(products);
         if(recString == null){
@@ -80,5 +96,37 @@ public record Recipe(ItemCost[] requirements, ItemCost[] products, Machine machi
             }
         }
         return null;
+    }
+
+    public Machine machine() {
+        return machine;
+    }
+    public double craftTime() {
+        return craftTime;
+    }
+    public String name() {
+        return name;
+    }
+    public ItemCost[] products() {
+        return products;
+    }
+    public ItemCost[] requirements() {
+        return requirements;
+    }
+
+    public void setCraftTime(double craftTime) {
+        this.craftTime = craftTime;
+    }
+    public void setMachine(Machine machine) {
+        this.machine = machine;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
+    public void setProducts(ItemCost[] products) {
+        this.products = products;
+    }
+    public void setRequirements(ItemCost[] requirements) {
+        this.requirements = requirements;
     }
 }

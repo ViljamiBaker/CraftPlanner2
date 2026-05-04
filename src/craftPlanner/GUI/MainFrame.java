@@ -46,7 +46,7 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
     Keyboard keyboard;
     JList<Item> itemlist;
     DefaultListModel<Item> listModel;
-    JList<Recipe> mecipeList;
+    JList<Recipe> recipeList;
     DefaultListModel<Recipe> recipeModel;
     JList<Machine> machineList;
     DefaultListModel<Machine> machineModel;
@@ -63,7 +63,7 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
         this.setSize(1400, 800);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setResizable(true);
-        this.setMinimumSize(new Dimension(600, 400));
+        this.setMinimumSize(new Dimension(800, 500));
         chooser = new JFileChooser();
 
         MainFrame.mainFrame = this;
@@ -94,7 +94,7 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
         itemlist.setLayoutOrientation(JList.VERTICAL);
         itemlist.setVisibleRowCount(-1);
         JScrollPane itemListScroll = new JScrollPane(itemlist);
-        itemListScroll.setPreferredSize(new Dimension(200, 800));
+        itemListScroll.setPreferredSize(new Dimension(220, 770));
         itemListScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         itemListScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
@@ -116,10 +116,10 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
 
         JPanel RecipePane = new JPanel(new BorderLayout(5,5));
         recipeModel = new DefaultListModel<Recipe>();
-        mecipeList = new JList<>(recipeModel);
-        mecipeList.setLayoutOrientation(JList.VERTICAL);
-        mecipeList.setVisibleRowCount(-1);
-        JScrollPane RecipeListScroll = new JScrollPane(mecipeList);
+        recipeList = new JList<>(recipeModel);
+        recipeList.setLayoutOrientation(JList.VERTICAL);
+        recipeList.setVisibleRowCount(-1);
+        JScrollPane RecipeListScroll = new JScrollPane(recipeList);
         RecipeListScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         RecipeListScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
@@ -131,14 +131,16 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
         JButton destroyButtonR = new JButton("Destroy");
         destroyButtonR.setActionCommand("DestroyRecipe");
         destroyButtonR.addActionListener(this);
-
         buttonPaneR.add(destroyButtonR);
 
         JButton addButtonR = new JButton("Add");
         addButtonR.setActionCommand("AddRecipe");
         addButtonR.addActionListener(this);
-
         buttonPaneR.add(addButtonR);
+        JButton renameButtonR = new JButton("Rename");
+        renameButtonR.setActionCommand("RenameRecipe");
+        renameButtonR.addActionListener(this);
+        buttonPaneR.add(renameButtonR);
 
         RecipePane.add(RecipeListScroll, BorderLayout.CENTER);
         RecipePane.add(buttonPaneR,BorderLayout.PAGE_END);
@@ -171,7 +173,7 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
         MachinePane.add(buttonPaneM,BorderLayout.PAGE_END);
 
         JPanel combinedPane = new JPanel(new GridLayout(1,2));
-        combinedPane.setPreferredSize(new Dimension(400,800));
+        combinedPane.setPreferredSize(new Dimension(440,770));
 
         combinedPane.add(MachinePane);
         combinedPane.add(RecipePane);
@@ -185,12 +187,11 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
         info = new JTextArea();
         info.setText("Info goes here \n");
         info.setRows(info.getRows()+2);
-        info.setFocusable(false);
         info.setEditable(false);
         info.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-        info.setPreferredSize(new Dimension(800, 150));
+        info.setPreferredSize(new Dimension(800, 180));
         JScrollPane infoScroll = new JScrollPane(info);
-        infoScroll.setPreferredSize(new Dimension(1000, 150));
+        infoScroll.setPreferredSize(new Dimension(1000, 180));
         infoScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         infoScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         infoPane.add(infoScroll, BorderLayout.CENTER);
@@ -220,6 +221,9 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
                 break;
             case Actions.CREATE_MACHINE_RECIPE:
                 Actions.CreateMachineRecipe();
+                break;
+            case Actions.RENAME_RECIPE:
+                Actions.RenameRecipe();
                 break;
             case "DestroyItem":
                 destroySelectedItems();
@@ -391,7 +395,7 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
     }
 
     private void destroySelectedRecipes(){
-        List<Recipe> selected = mecipeList.getSelectedValuesList();
+        List<Recipe> selected = recipeList.getSelectedValuesList();
         for (Recipe recipe : selected) {
             Registry.removeRecipe(recipe);
         }
@@ -407,7 +411,7 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
     }
 
     private void addSelectedRecipes(){
-        List<Recipe> selected = mecipeList.getSelectedValuesList();
+        List<Recipe> selected = recipeList.getSelectedValuesList();
         for (Recipe recipe : selected) {
             plan.addPlanNode(recipe);
         }
@@ -434,5 +438,11 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
 
     public Item[] getSelectedItems(){
         return itemlist.getSelectedValuesList().toArray(new Item[0]);
+    }
+    public Recipe[] getSelectedRecipies(){
+        return recipeList.getSelectedValuesList().toArray(new Recipe[0]);
+    }
+    public Machine[] getSelectedMachines(){
+        return machineList.getSelectedValuesList().toArray(new Machine[0]);
     }
 }

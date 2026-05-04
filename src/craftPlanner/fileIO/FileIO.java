@@ -131,7 +131,8 @@ public class FileIO {
                     toSaveString(recipes[i].requirements(),items) + COMPONENT_SPLIT + 
                     toSaveString(recipes[i].products(),items) + COMPONENT_SPLIT + 
                     indexOf(machines,recipes[i].machine()) + COMPONENT_SPLIT + 
-                    recipes[i].craftTime() + ITEM_SPLIT);
+                    recipes[i].craftTime() + COMPONENT_SPLIT + 
+                    recipes[i].name() + ITEM_SPLIT);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -193,11 +194,14 @@ public class FileIO {
             String prod = recsplit[1];
             int mac = Integer.valueOf(recsplit[2]);
             double time = Double.valueOf(recsplit[3]);
+            String name = "";
+            if(recsplit.length>4)
+             name = recsplit[4];
             Recipe recipie = null;
             if(time < 0.0){
-                recipie = Registry.createRecipe(decodeSaveString(req, items), decodeSaveString(prod, items));
+                recipie = Registry.createRecipe(decodeSaveString(req, items), decodeSaveString(prod, items), name);
             }else{
-                recipie = Registry.createMachineRecipe(decodeSaveString(req, items), decodeSaveString(prod, items), machines[mac].name(), time);
+                recipie = Registry.createMachineRecipe(decodeSaveString(req, items), decodeSaveString(prod, items), machines[mac].name(), time, name);
             }
             recipies[i] = recipie;
         }

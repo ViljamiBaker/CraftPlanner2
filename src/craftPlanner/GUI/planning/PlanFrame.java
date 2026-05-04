@@ -122,23 +122,19 @@ public class PlanFrame extends JPanel{
     public void removePlanNode(PlanNode n){
         nodes.remove(n);
         // son im crine
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                panel.remove(n);
-                panel.repaint();
-                SwingUtilities.updateComponentTreeUI(panel);
-                if(n.equals(MainFrame.mainFrame.editor.selectedNode))
-                    MainFrame.mainFrame.editor.deselectNode();
-                for (NodeConnection nc : n.incomingConnections) {
-                    nc.from.outgoingConnections.remove(nc);
-                }
-                n.incomingConnections.clear();
-                for (NodeConnection nc : n.outgoingConnections) {
-                    nc.to.incomingConnections.remove(nc);
-                }
-                n.outgoingConnections.clear();
-            }
-        });
+        panel.remove(n);
+        panel.repaint();
+        SwingUtilities.updateComponentTreeUI(panel);
+        if(n.equals(MainFrame.mainFrame.editor.selectedNode))
+            MainFrame.mainFrame.editor.deselectNode();
+        for (NodeConnection nc : n.incomingConnections) {
+            nc.from.outgoingConnections.remove(nc);
+        }
+        n.incomingConnections.clear();
+        for (NodeConnection nc : n.outgoingConnections) {
+            nc.to.incomingConnections.remove(nc);
+        }
+        n.outgoingConnections.clear();
     }
 
     public void updateAllLayers(){

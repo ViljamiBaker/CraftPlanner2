@@ -58,12 +58,12 @@ public class Registry {
         }
         return null;
     }
-    public static Recipe createRecipe(ItemCost[] requirements, ItemCost[] products){
-        return createMachineRecipe(requirements, products, null, -1.0);
+    public static Recipe createRecipe(ItemCost[] requirements, ItemCost[] products, String name){
+        return createMachineRecipe(requirements, products, null, -1.0, name);
     }
-    public static Recipe createMachineRecipe(ItemCost[] requirements, ItemCost[] products, String machine, double craftTime){
+    public static Recipe createMachineRecipe(ItemCost[] requirements, ItemCost[] products, String machine, double craftTime, String name){
         Machine m = getMachine(machine);
-        Recipe Recipe = new Recipe(requirements, products, m, (m==null?-1.0:craftTime));
+        Recipe Recipe = new Recipe(requirements, products, m, (m==null?-1.0:craftTime), name);
         Recipe oldRecipe = getRecipe(Recipe);
         if(oldRecipe!=null) return oldRecipe;
         recipes.add(Recipe);
@@ -72,9 +72,13 @@ public class Registry {
     }
     public static void removeRecipe(Recipe r){
         recipes.remove(r);
+        ArrayList<PlanNode> nodesToRemove = new ArrayList<>();
         for (PlanNode n : PlanFrame.planFrame.nodes) {
             if(n.r.equals(r))
-                PlanFrame.planFrame.removePlanNode(n);
+                nodesToRemove.add(n);
+        }
+        for (PlanNode n : nodesToRemove) {
+            PlanFrame.planFrame.removePlanNode(n);
         }
     }
 

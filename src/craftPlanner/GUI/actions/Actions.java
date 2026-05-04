@@ -10,6 +10,7 @@ import javax.swing.JTextField;
 
 import craftPlanner.GUI.MainFrame;
 import craftPlanner.crafts.ItemCost;
+import craftPlanner.crafts.Recipe;
 import craftPlanner.crafts.Registry;
 
 public class Actions {
@@ -71,13 +72,17 @@ public class Actions {
     private static class CreateRecipeFrame extends CustomFrame{
         GhostText cost;
         GhostText product;
+        GhostText namefeild;
         public CreateRecipeFrame(){
             this.setTitle("Create new recipe");
+            cost = new GhostText(new JTextField(""), "Name here");
+            cost.textfield.setBounds(50,5,200,25);
+            this.add(cost.textfield);
             cost = new GhostText(new JTextField(""), "Requirements here");
-            cost.textfield.setBounds(50,20,200,25);
+            cost.textfield.setBounds(50,30,200,25);
             this.add(cost.textfield);
             product = new GhostText(new JTextField(""), "Products here");
-            product.textfield.setBounds(50,45,200,25);
+            product.textfield.setBounds(50,55,200,25);
             this.add(product.textfield);
             
         }
@@ -85,6 +90,7 @@ public class Actions {
         public void runEvent(){
             ItemCost[] costs = null;
             ItemCost[] products = null;
+            String name = namefeild.getText();
             try {
                 costs = Registry.createItemCosts(cost.getText());
                 products = Registry.createItemCosts(product.getText());
@@ -95,8 +101,9 @@ public class Actions {
             }
             cost.delete();
             product.delete();
+            namefeild.delete();
             if(costs == null||products == null) return;
-            Registry.createRecipe(costs, products);
+            Registry.createRecipe(costs, products, name);
         }
     }
     public static void CreateRecipe(){
@@ -140,10 +147,11 @@ public class Actions {
 
     public static final String CREATE_MACHINE_RECIPE = "CreateMachineRecipe";
     private static class CreateMachineRecipeFrame extends CustomFrame{
-        GhostText namefeild;
+        GhostText machinefeild;
         GhostText product;
         GhostText requirement;
         GhostText timefeild;
+        GhostText namefeild;
         public CreateMachineRecipeFrame(){
             this.setTitle("Create new machine recipe");
             requirement = new GhostText(new JTextField(""), "Requirements here");
@@ -152,20 +160,24 @@ public class Actions {
             product = new GhostText(new JTextField(""), "Products here");
             product.textfield.setBounds(50,30,200,25);
             this.add(product.textfield);
-            namefeild = new GhostText(new JTextField(""), "Machine here");
-            namefeild.textfield.setBounds(50,55,100,25);
-            this.add(namefeild.textfield);
+            timefeild = new GhostText(new JTextField(""), "Name here");
+            timefeild.textfield.setBounds(30,55,80,25);
+            this.add(timefeild.textfield);
+            machinefeild = new GhostText(new JTextField(""), "Machine here");
+            machinefeild.textfield.setBounds(110,55,80,25);
+            this.add(machinefeild.textfield);
             timefeild = new GhostText(new JTextField(""), "Time here");
-            timefeild.textfield.setBounds(150,55,100,25);
+            timefeild.textfield.setBounds(190,55,80,25);
             this.add(timefeild.textfield);
             
         }
         @Override
         public void runEvent(){
-            String name = namefeild.getText();
+            String machineName = machinefeild.getText();
             ItemCost[] products = null;
             ItemCost[] requirements = null;
             double time = -1.0;
+            String name = namefeild.getText();
             try {
                 products = Registry.createItemCosts(product.getText());
                 requirements = Registry.createItemCosts(requirement.getText());
@@ -175,15 +187,41 @@ public class Actions {
                     MainFrame.mainFrame.addInfo(e.getMessage());
                 }
             }
-            namefeild.delete();
+            machinefeild.delete();
             product.delete();
             requirement.delete();
             timefeild.delete();
+            namefeild.delete();
             if(name.length()==0||products == null) return;
-            Registry.createMachineRecipe(requirements, products, name, time);
+            Registry.createMachineRecipe(requirements, products, machineName, time, name);
         }
     }
     public static void CreateMachineRecipe(){
         new CreateMachineRecipeFrame();
+    }
+
+    public static final String RENAME_RECIPE = "RenameRecipe";
+    private static class RenameRecipeFrame extends CustomFrame{
+        GhostText namefeild;
+        Recipe r;
+        public RenameRecipeFrame(Recipe r){
+            this.setTitle("Rename Recipe \"" + r.toString() + "\"");
+            namefeild = new GhostText(new JTextField(""), "Name here");
+            namefeild.textfield.setBounds(50,32,200,25);
+            this.add(namefeild.textfield);
+            this.r = r;
+        }
+        @Override
+        public void runEvent(){
+            String name = namefeild.getText();
+            namefeild.delete();
+            r.setName(name);
+            System.out.println(name);
+            MainFrame.mainFrame.updateRegistery();
+        }
+    }
+    public static void RenameRecipe(){
+        Recipe[] recipes = MainFrame.mainFrame.getSelectedRecipies();
+        new RenameRecipeFrame(recipes[0]);
     }
 }
