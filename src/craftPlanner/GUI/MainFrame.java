@@ -33,6 +33,7 @@ import javax.swing.KeyStroke;
 
 import craftPlanner.Settings;
 import craftPlanner.GUI.actions.Actions;
+import craftPlanner.GUI.actions.TotalFrame;
 import craftPlanner.GUI.planning.PlanFrame;
 import craftPlanner.GUI.planning.PlanNodeEditor;
 import craftPlanner.crafts.Item;
@@ -257,6 +258,12 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
             case "LoadCombined":
                 file(false, FileType.COMBINED);
                 break;
+
+            case "PlanSelected":
+                if(editor.selectedNode != null)
+                    new TotalFrame(editor.selectedNode);
+                break;
+
             case "Quit":
                 this.setVisible(false);
                 this.dispose();
@@ -357,6 +364,15 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
         creation.addSeparator();
         creation.add(createCheckbox("Automatically Add Items", "AutoAdd", 0));
         creation.add(createCheckbox("Require Round Crafts", "ReqRound", 0));
+
+        JMenu plan = new JMenu("Plan");
+        plan.setMnemonic(KeyEvent.VK_P);
+        menuBar.add(plan);
+
+        plan.add(createMenuItem("Plan Selected Node", "PlanSelected", KeyEvent.VK_P));
+        plan.addSeparator();
+        //plan.add(createCheckbox("Automatically Add Items", "AutoAdd", 0));
+        //plan.add(createCheckbox("Require Round Crafts", "ReqRound", 0));
 
         return menuBar;
     }

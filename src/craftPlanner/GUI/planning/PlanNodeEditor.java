@@ -22,13 +22,12 @@ import craftPlanner.GUI.MainFrame;
 import craftPlanner.GUI.actions.GhostText;
 import craftPlanner.GUI.planning.PlanNode.SelectStatus;
 import craftPlanner.crafts.Item;
-import craftPlanner.crafts.ItemCost;
 import craftPlanner.crafts.Recipe;
 
 public class PlanNodeEditor extends JPanel implements ActionListener{
     public static PlanNodeEditor editor = null;
-    PlanNode selectedNode = null;
-    PlanNode connectingNode = null;
+    public PlanNode selectedNode = null;
+    public PlanNode connectingNode = null;
 
     GhostText nodeinfo;
     GhostText thisinfo;
@@ -301,9 +300,7 @@ public class PlanNodeEditor extends JPanel implements ActionListener{
                 deselectConnectedNodes();
                 return;
             }
-            NodeConnection nc = new NodeConnection(connectingNode, selectedNode, new ItemCost(item, 0.0));
-            connectingNode.outgoingConnections.add(nc);
-            selectedNode.incomingConnections.add(nc);
+            PlanNode.connect(connectingNode, selectedNode, item, 0.0);
         }
         MainFrame.mainFrame.addInfo("Connected \"" + connectingNode.r + "\" to \"" + selectedNode.r + "\"");
         deselectConnectedNodes();

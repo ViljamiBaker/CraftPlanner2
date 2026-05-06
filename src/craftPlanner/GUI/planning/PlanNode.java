@@ -12,10 +12,12 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import craftPlanner.Settings;
+import craftPlanner.GUI.MainFrame;
 import craftPlanner.GUI.actions.DraggableComponent;
 import craftPlanner.crafts.Item;
 import craftPlanner.crafts.ItemCost;
 import craftPlanner.crafts.Recipe;
+import craftPlanner.crafts.RecipeCost;
 
 public class PlanNode extends DraggableComponent{
 
@@ -137,6 +139,10 @@ public class PlanNode extends DraggableComponent{
     }
 
     public void updateLayer(int parentlayer){
+        if(parentlayer>255){
+            MainFrame.mainFrame.addInfo("Error: Depth limit exceeded! Do you have a loop somewhere?");
+            return;
+        }
         this.layer = parentlayer+1;
         for (NodeConnection nodeConnection : incomingConnections) {
             nodeConnection.from.updateLayer(this.layer);
@@ -265,7 +271,7 @@ public class PlanNode extends DraggableComponent{
         this.repaint();
     }
 
-        public void craftStatus(CraftStatus status){
+    public void craftStatus(CraftStatus status){
         Color newcolor = null;
         String newStatus = "";
         switch (status) {
@@ -295,5 +301,57 @@ public class PlanNode extends DraggableComponent{
             if(nc.from.equals(this)&&nc.cost.item().equals(i)) return true;
         }
         return false;
+    }
+
+    public static void connect(PlanNode from, PlanNode to, Item i, double rCount){
+        NodeConnection nc = new NodeConnection(from, to, new ItemCost(i, rCount));
+        from.outgoingConnections.add(nc);
+        to.incomingConnections.add(nc);
+    }
+
+    @Override
+    public String toString(){
+        ItemCost[] products = null;
+        if(!r.isEnd()){
+            products = ItemCost.clone(r.products(), craftCount);
+        }else{
+            products = ItemCost.clone(r.requirements(), craftCount);
+        }
+        return Recipe.CreateRecipeString(products);
+    }
+
+    public PlanCost toPlanCost(){
+        if(r.isBase()){
+            ItemCost[] cost = ItemCost.clone(r.products(), craftCount);
+            ItemCost[] machineCost = new ItemCost[0];
+            if(r.isMachineRecipe()){
+                machineCost = new ItemCost[r.machine().costPerSecond().length];
+                for (int i = 0; i < machineCost.length; i++) {
+                    ItemCost ic = r.machine().costPerSecond()[i];
+                    machineCost[i] = new ItemCost(ic.item(), ic.cost());
+                }
+            }
+            return new PlanCost(new RecipeCost[]{new RecipeCost(r, craftCount)}, cost, machineCost);
+        }
+        ArrayList<RecipeCost> totalCost = new ArrayList<>();
+        ArrayList<ItemCost> baseCost = new ArrayList<>();
+        ArrayList<ItemCost> machineCost = new ArrayList<>();
+
+        for (NodeConnection nc : incomingConnections) {
+            PlanNode n = nc.from;
+            PlanCost pc = n.toPlanCost();
+            for (RecipeCost tc : pc.totalCost()) {
+                totalCost.add(tc);
+            }
+            ItemCost.merge(baseCost, pc.baseCost());
+            ItemCost.merge(machineCost, pc.machineCost());
+        }
+
+        totalCost.add(new RecipeCost(r, craftCount));
+
+        if(r.isMachineRecipe())
+            ItemCost.merge(machineCost, r.machine().costPerSecond());
+
+        return new PlanCost(totalCost.toArray(new RecipeCost[0]), baseCost.toArray(new ItemCost[0]), machineCost.toArray(new ItemCost[0]));
     }
 }

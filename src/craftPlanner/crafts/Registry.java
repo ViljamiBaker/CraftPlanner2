@@ -59,11 +59,12 @@ public class Registry {
         return null;
     }
     public static Recipe createRecipe(ItemCost[] requirements, ItemCost[] products, String name){
-        return createMachineRecipe(requirements, products, null, -1.0, name);
+        return createMachineRecipe(requirements, products, null, null, -1.0, name);
     }
-    public static Recipe createMachineRecipe(ItemCost[] requirements, ItemCost[] products, String machine, double craftTime, String name){
+    public static Recipe createMachineRecipe(ItemCost[] requirements, ItemCost[] products, ItemCost[] costPerSecond, String machine, double craftTime, String name){
         Machine m = getMachine(machine);
-        Recipe Recipe = new Recipe(requirements, products, m, (m==null?-1.0:craftTime), name);
+                                                                          // are we deadass
+        Recipe Recipe = new Recipe(requirements, products, (costPerSecond == null?(m == null?null:m.costPerSecond()):costPerSecond),m, (m==null?-1.0:craftTime), name);
         Recipe oldRecipe = getRecipe(Recipe);
         if(oldRecipe!=null) return oldRecipe;
         recipes.add(Recipe);

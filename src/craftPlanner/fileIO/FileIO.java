@@ -83,6 +83,7 @@ public class FileIO {
     }
 
     private static String toSaveString(ItemCost[] arr, Item[] code){
+        if(arr == null) return "[]";
         int iMax = arr.length - 1;
         if (iMax == -1)
             return "[]";
@@ -130,9 +131,10 @@ public class FileIO {
                 writer.write(
                     toSaveString(recipes[i].requirements(),items) + COMPONENT_SPLIT + 
                     toSaveString(recipes[i].products(),items) + COMPONENT_SPLIT + 
+                    toSaveString(recipes[i].costPerSecond(),items) + COMPONENT_SPLIT + 
                     indexOf(machines,recipes[i].machine()) + COMPONENT_SPLIT + 
                     recipes[i].craftTime() + COMPONENT_SPLIT + 
-                    recipes[i].name() + ITEM_SPLIT);
+                    (recipes[i].name().length() == 0? " " + COMPONENT_SPLIT:recipes[i].name()) + ITEM_SPLIT);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -192,16 +194,18 @@ public class FileIO {
             String[] recsplit = recstr.split("[" + COMPONENT_SPLIT + "]");
             String req = recsplit[0];
             String prod = recsplit[1];
-            int mac = Integer.valueOf(recsplit[2]);
-            double time = Double.valueOf(recsplit[3]);
-            String name = "";
-            if(recsplit.length>4)
-             name = recsplit[4];
+            String cps = recsplit[2];
+            int mac = Integer.valueOf(recsplit[3]);
+            double time = Double.valueOf(recsplit[4]);
+            String name = recsplit[5];
+            name = name.trim();
             Recipe recipie = null;
             if(time < 0.0){
                 recipie = Registry.createRecipe(decodeSaveString(req, items), decodeSaveString(prod, items), name);
             }else{
-                recipie = Registry.createMachineRecipe(decodeSaveString(req, items), decodeSaveString(prod, items), machines[mac].name(), time, name);
+                ItemCost[] costspersec = decodeSaveString(cps, items);
+                if(costspersec.length == 0) costspersec = null;
+                recipie = Registry.createMachineRecipe(decodeSaveString(req, items), decodeSaveString(prod, items), costspersec, machines[mac].name(), time, name);
             }
             recipies[i] = recipie;
         }

@@ -4,13 +4,15 @@ import java.util.Arrays;
 
 public class Recipe {
     private ItemCost[] requirements;
-    private ItemCost[] products;
+    private ItemCost[] products; 
+    private ItemCost[] costPerSecond;
     private Machine machine;
     private double craftTime;
     private String name;
-    public Recipe(ItemCost[] requirements, ItemCost[] products, Machine machine, double craftTime, String name){
+    public Recipe(ItemCost[] requirements, ItemCost[] products, ItemCost[] costPerSecond, Machine machine, double craftTime, String name){
         this.requirements = requirements;
         this.products = products;
+        this.costPerSecond = costPerSecond;
         this.machine = machine;
         this.craftTime = craftTime;
         this.name = name;
@@ -55,7 +57,13 @@ public class Recipe {
         if(craftTime == -1.0){
             return prodString + " With: " + recString;
         }
-        return prodString + " With: " + recString + " Every " + craftTime + " Seconds in " + machine;
+        String machineString = "";
+        if(costPerSecond.length == 0){
+            machineString = machine.toString();
+        }else{
+            machineString = machine.name() + Recipe.CreateRecipeString(costPerSecond);
+        }
+        return prodString + " With: " + recString + " Every " + craftTime + " Seconds in " + machineString;
     }
 
     public static String CreateRecipeString(ItemCost[] requirements) {
@@ -98,6 +106,13 @@ public class Recipe {
         return null;
     }
 
+    public boolean isBase(){
+        return requirements.length==0;
+    }
+    public boolean isEnd(){
+        return products.length==0;
+    }
+
     public Machine machine() {
         return machine;
     }
@@ -109,6 +124,9 @@ public class Recipe {
     }
     public ItemCost[] products() {
         return products;
+    }
+    public ItemCost[] costPerSecond() {
+        return costPerSecond;
     }
     public ItemCost[] requirements() {
         return requirements;
@@ -122,6 +140,9 @@ public class Recipe {
     }
     public void setName(String name) {
         this.name = name;
+    }
+    public void setCostPerSecond(ItemCost[] costPerSecond) {
+        this.costPerSecond = costPerSecond;
     }
     public void setProducts(ItemCost[] products) {
         this.products = products;

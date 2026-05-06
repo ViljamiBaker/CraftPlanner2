@@ -24,13 +24,13 @@ public class Actions {
             this.setLayout(null);
 
             JButton confirm = new JButton("Confirm");
-            confirm.setBounds(150,80,100,50);
+            confirm.setBounds(150,105,100,50);
             confirm.setActionCommand("O");
             confirm.addActionListener(this);
             this.add(confirm);
 
             JButton cancel = new JButton("Cancel");
-            cancel.setBounds(50,80,100,50);
+            cancel.setBounds(50,105,100,50);
             cancel.setActionCommand("X");
             cancel.addActionListener(this);
             this.add(cancel);
@@ -150,6 +150,7 @@ public class Actions {
         GhostText machinefeild;
         GhostText product;
         GhostText requirement;
+        GhostText costPerSecond;
         GhostText timefeild;
         GhostText namefeild;
         public CreateMachineRecipeFrame(){
@@ -160,14 +161,17 @@ public class Actions {
             product = new GhostText(new JTextField(""), "Products here");
             product.textfield.setBounds(50,30,200,25);
             this.add(product.textfield);
-            timefeild = new GhostText(new JTextField(""), "Name here");
-            timefeild.textfield.setBounds(30,55,80,25);
-            this.add(timefeild.textfield);
+            costPerSecond = new GhostText(new JTextField(""), "Cost per second here");
+            costPerSecond.textfield.setBounds(50,55,200,25);
+            this.add(costPerSecond.textfield);
+            namefeild = new GhostText(new JTextField(""), "Name here");
+            namefeild.textfield.setBounds(30,80,80,25);
+            this.add(namefeild.textfield);
             machinefeild = new GhostText(new JTextField(""), "Machine here");
-            machinefeild.textfield.setBounds(110,55,80,25);
+            machinefeild.textfield.setBounds(110,80,80,25);
             this.add(machinefeild.textfield);
             timefeild = new GhostText(new JTextField(""), "Time here");
-            timefeild.textfield.setBounds(190,55,80,25);
+            timefeild.textfield.setBounds(190,80,80,25);
             this.add(timefeild.textfield);
             
         }
@@ -176,11 +180,14 @@ public class Actions {
             String machineName = machinefeild.getText();
             ItemCost[] products = null;
             ItemCost[] requirements = null;
+            ItemCost[] cps = null;
             double time = -1.0;
             String name = namefeild.getText();
             try {
                 products = Registry.createItemCosts(product.getText());
                 requirements = Registry.createItemCosts(requirement.getText());
+                if(costPerSecond.getText().length()!=0)
+                    cps = Registry.createItemCosts(costPerSecond.getText());
                 time = Double.valueOf(timefeild.getText());
             } catch (Exception e) {
                 if(e.getClass().equals(IllegalArgumentException.class)){
@@ -190,10 +197,11 @@ public class Actions {
             machinefeild.delete();
             product.delete();
             requirement.delete();
+            costPerSecond.delete();
             timefeild.delete();
             namefeild.delete();
-            if(name.length()==0||products == null) return;
-            Registry.createMachineRecipe(requirements, products, machineName, time, name);
+            //if(products == null) return;
+            Registry.createMachineRecipe(requirements, products, cps, machineName, time, name);
         }
     }
     public static void CreateMachineRecipe(){
