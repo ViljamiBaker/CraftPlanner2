@@ -325,9 +325,9 @@ public class PlanNode extends DraggableComponent{
             ItemCost[] cost = ItemCost.clone(r.products(), craftCount);
             ItemCost[] machineCost = new ItemCost[0];
             if(r.isMachineRecipe()){
-                machineCost = new ItemCost[r.machine().costPerSecond().length];
+                machineCost = new ItemCost[r.costPerSecond().length];
                 for (int i = 0; i < machineCost.length; i++) {
-                    ItemCost ic = r.machine().costPerSecond()[i];
+                    ItemCost ic = r.costPerSecond()[i];
                     machineCost[i] = new ItemCost(ic.item(), ic.cost());
                 }
             }
@@ -350,7 +350,7 @@ public class PlanNode extends DraggableComponent{
         totalCost.add(new RecipeCost(r, craftCount));
 
         if(r.isMachineRecipe())
-            ItemCost.merge(machineCost, r.machine().costPerSecond());
+            ItemCost.merge(machineCost, r.costPerSecond());
 
         return new PlanCost(totalCost.toArray(new RecipeCost[0]), baseCost.toArray(new ItemCost[0]), machineCost.toArray(new ItemCost[0]));
     }

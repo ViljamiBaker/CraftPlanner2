@@ -1,4 +1,4 @@
-package craftPlanner.GUI.actions;
+package craftPlanner.GUI.util;
 
 import java.awt.Color;
 import java.awt.event.FocusEvent;

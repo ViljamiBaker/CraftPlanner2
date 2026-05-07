@@ -126,7 +126,9 @@ public class Recipe {
         return products;
     }
     public ItemCost[] costPerSecond() {
-        return costPerSecond;
+        if(costPerSecond != null)
+            return costPerSecond;
+        return machine.costPerSecond();
     }
     public ItemCost[] requirements() {
         return requirements;
