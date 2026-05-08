@@ -128,6 +128,8 @@ public class Recipe {
     public ItemCost[] costPerSecond() {
         if(costPerSecond != null)
             return costPerSecond;
+        if(!isMachineRecipe())
+            return new ItemCost[0];
         return machine.costPerSecond();
     }
     public ItemCost[] requirements() {

@@ -28,6 +28,9 @@ public class ItemCost{
         this.cost = cost;
     }
     public static void merge(ArrayList<ItemCost> a, ItemCost[] b){
+        merge(a, b, 1.0);
+    }
+    public static void merge(ArrayList<ItemCost> a, ItemCost[] b, double scalar){
         ArrayList<ItemCost> excess = new ArrayList<>();
         for (ItemCost c : b) {
             int idx = a.indexOf(c);
@@ -36,14 +39,21 @@ public class ItemCost{
                 continue;
             }
             ItemCost og = a.get(idx);
-            og.setCost(og.cost + c.cost);
+            og.setCost(og.cost + c.cost * scalar);
             a.set(idx, og);
         }
         for (ItemCost c : excess) {
-            a.add(c);
+            a.add(new ItemCost(c.item(), c.cost() * scalar));
         }
+        excess.clear();
+        for (ItemCost c : a) {
+            if(c.cost()<=0){
+                excess.add(c);
+            }
+        }
+        a.removeAll(excess);
     }
-    public static ItemCost[] clone(ItemCost[] a, double scalar){
+    public static ItemCost[] scale(ItemCost[] a, double scalar){
         ItemCost[] b = new ItemCost[a.length];
         for (int i = 0; i < b.length; i++) {
             b[i] = new ItemCost(a[i].item(), a[i].cost()*scalar);

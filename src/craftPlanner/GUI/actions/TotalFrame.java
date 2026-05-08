@@ -20,7 +20,7 @@ public class TotalFrame extends JFrame{
         this.setContentPane(createContentPane(parent));
         this.setVisible(true);
         this.setSize(500, 800);
-        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         this.setResizable(true);
         this.setMinimumSize(new Dimension(500,500));
     }
@@ -42,13 +42,17 @@ public class TotalFrame extends JFrame{
         for (int i = cost.totalCost().length-1; i>=0; i--) {
             RecipeCost c = cost.totalCost()[i];
             if(c.recipe().products().length == 0) continue;
-            str += "Craft " + c.cost() + " of \"" + c.recipe().toString() + "\n";
+            str += "Craft " + c.cost() + " of " + c.recipe().toString() + "\n";
         }
         if(parent.r.isMachineRecipe()){
             str += "-------- MACHINE RESOURCES --------\n";
             for (ItemCost c : cost.machineCost()) {
                 str += c.cost() + " " + c.item().name() + "/s\n";
             }
+        }
+        str += "-------- EXESS --------\n";
+        for (ItemCost c : cost.excessItems()) {
+            str += c.cost() + " of " + c.item().name() + "\n";
         }
         info.setText(str);
 

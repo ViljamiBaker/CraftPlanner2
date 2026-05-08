@@ -19,8 +19,8 @@ import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 
 import craftPlanner.GUI.MainFrame;
-import craftPlanner.GUI.actions.GhostText;
 import craftPlanner.GUI.planning.PlanNode.SelectStatus;
+import craftPlanner.GUI.util.GhostText;
 import craftPlanner.crafts.Item;
 import craftPlanner.crafts.Recipe;
 
@@ -60,7 +60,15 @@ public class PlanNodeEditor extends JPanel implements ActionListener{
         panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         GridBagConstraints c = new GridBagConstraints();
         panel.setBackground(Color.WHITE);
-        JButton button = createButton("Delete", "KillMe");
+        JButton button = createButton("<html><u>D</u>elete</html>", "KillMe");
+        button.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+            .put(KeyStroke.getKeyStroke(KeyEvent.VK_D, InputEvent.SHIFT_DOWN_MASK), "KillMe");
+        button.getActionMap().put("KillMe", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                button.doClick();
+            }
+        });
         JButton requestButton = createButton("Request", "Request");
         JButton connectButton = createButton("<html><u>C</u>onnect</html>", "Connect");
         connectButton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)

@@ -58,6 +58,15 @@ public class Registry {
         }
         return null;
     }
+    public static Recipe[] getRecipe(Item i){
+        ArrayList<Recipe> r = new ArrayList<>();
+        for (Recipe recipe : recipes) {
+            if(recipe.producesItem(i)){
+                r.add(recipe);
+            }
+        }
+        return r.toArray(new Recipe[0]);
+    }
     public static Recipe createRecipe(ItemCost[] requirements, ItemCost[] products, String name){
         return createMachineRecipe(requirements, products, null, null, -1.0, name);
     }
@@ -102,6 +111,7 @@ public class Registry {
         Machine oldMachine = getMachine(machine);
         if(oldMachine!=null) return oldMachine;
         machines.add(machine);
+        MainFrame.mainFrame.updateRegistery();
         return machine;
     }
     public static void removeMachine(Machine m){

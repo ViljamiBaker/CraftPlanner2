@@ -1,22 +1,20 @@
 package craftPlanner.GUI.util;
 
 import java.util.ArrayList;
-
-import javax.swing.AbstractListModel;
-import javax.swing.ListModel;
+import javax.swing.DefaultListModel;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 
-public class FilteredListModel<T> extends AbstractListModel<T> {
+public class FilteredListModel<T> extends DefaultListModel<T> {
     public static interface Filter {
         boolean accept(Object element);
     }
 
-    private final ListModel<T> source;
+    private final DefaultListModel<T> source;
     private Filter filter;
     private final ArrayList<Integer> indices = new ArrayList<Integer>();
 
-    public FilteredListModel(ListModel<T> source) {
+    public FilteredListModel(DefaultListModel<T> source) {
         if (source == null)
             throw new IllegalArgumentException("Source is null");
         this.source = source;
@@ -40,7 +38,7 @@ public class FilteredListModel<T> extends AbstractListModel<T> {
         doFilter();
     }
 
-    private void doFilter() {
+    public void doFilter() {
         indices.clear();
 
         Filter f = filter;
@@ -62,5 +60,15 @@ public class FilteredListModel<T> extends AbstractListModel<T> {
 
     public T getElementAt(int index) {
         return (filter != null) ? source.getElementAt(indices.get(index)) : source.getElementAt(index);
+    }
+
+    public void addElement(T element) {
+        source.addElement(element);
+        doFilter();
+    }
+
+    public void removeAllElements() {
+        source.removeAllElements();
+        doFilter();
     }
 }

@@ -26,6 +26,7 @@ public class PlanNode extends DraggableComponent{
     private JTextField recName;
     private JTextField prodName;
     private JTextField craftCountText;
+    public CraftStatus status;
 
     private JTextField createTextFeild(String str, boolean highlightable, boolean outline){
         JTextField text = new JTextField(str);
@@ -162,6 +163,10 @@ public class PlanNode extends DraggableComponent{
         }
     }
 
+    public double getScalar(){
+        return r.isMachineRecipe()?1.0/r.craftTime() * craftCount:craftCount;
+    }
+
     public boolean update(int layer){
         if(this.layer != layer+1) return true;
         if(!isParent()){
@@ -178,14 +183,13 @@ public class PlanNode extends DraggableComponent{
             craftCount = -1.0;
             for (int i = 0; i < crafting.length; i++) {
                 double count = crafting[i].cost();
+                    double production = r.getProduction(crafting[i].item()) * getScalar();
                 if(r.isMachineRecipe()){
                     // treat c.cost as items/s for this
-                    double production = r.getProduction(crafting[i].item())/r.craftTime() * craftCount;
                     if(production<count){
                         craftCount = crafting[i].cost() / r.getProduction(crafting[i].item()) * r.craftTime();
                     }
                 }else{
-                    double production = r.getProduction(crafting[i].item()) * craftCount;
                     if(production<count){
                         craftCount = crafting[i].cost() / r.getProduction(crafting[i].item());
                     }
@@ -290,6 +294,7 @@ public class PlanNode extends DraggableComponent{
         }
         craftIndecator.setBackground(newcolor);
         craftIndecator.setText(newStatus);
+        this.status = status;
         this.repaint();
     }
 
@@ -313,16 +318,40 @@ public class PlanNode extends DraggableComponent{
     public String toString(){
         ItemCost[] products = null;
         if(!r.isEnd()){
-            products = ItemCost.clone(r.products(), craftCount);
+            products = getProduction();
         }else{
-            products = ItemCost.clone(r.requirements(), craftCount);
+            products = getCost();
         }
         return Recipe.CreateRecipeString(products);
     }
 
+    public ItemCost[] getCost(){
+        if(craftCount<=0.0) return new ItemCost[0];
+        return ItemCost.scale(r.requirements(), getScalar());
+    }
+    public ItemCost[] getProduction(){
+        if(craftCount<=0.0) return new ItemCost[0];
+        return ItemCost.scale(r.products(), getScalar());
+    }
+
+    public ItemCost[] getExessItems(){
+        if(craftCount<=0.0) return new ItemCost[0];
+        ArrayList<ItemCost> prod = new ArrayList<>();
+        for (ItemCost c : getProduction()) {
+            prod.add(c);
+        }
+        ItemCost[] req = new ItemCost[outgoingConnections.size()];
+        for (int i = 0; i < req.length; i++) {
+            ItemCost r = outgoingConnections.get(i).cost;
+            req[i] = r;
+        }
+        ItemCost.merge(prod, req, -1.0);
+        return prod.toArray(new ItemCost[0]);
+    }
+
     public PlanCost toPlanCost(){
         if(r.isBase()){
-            ItemCost[] cost = ItemCost.clone(r.products(), craftCount);
+            ItemCost[] cost = getCost();
             ItemCost[] machineCost = new ItemCost[0];
             if(r.isMachineRecipe()){
                 machineCost = new ItemCost[r.costPerSecond().length];
@@ -331,11 +360,12 @@ public class PlanNode extends DraggableComponent{
                     machineCost[i] = new ItemCost(ic.item(), ic.cost());
                 }
             }
-            return new PlanCost(new RecipeCost[]{new RecipeCost(r, craftCount)}, cost, machineCost);
+            return new PlanCost(new RecipeCost[]{new RecipeCost(r, craftCount)}, cost, machineCost, getExessItems());
         }
         ArrayList<RecipeCost> totalCost = new ArrayList<>();
         ArrayList<ItemCost> baseCost = new ArrayList<>();
         ArrayList<ItemCost> machineCost = new ArrayList<>();
+        ArrayList<ItemCost> excessCost = new ArrayList<>();
 
         for (NodeConnection nc : incomingConnections) {
             PlanNode n = nc.from;
@@ -345,13 +375,15 @@ public class PlanNode extends DraggableComponent{
             }
             ItemCost.merge(baseCost, pc.baseCost());
             ItemCost.merge(machineCost, pc.machineCost());
+            ItemCost.merge(excessCost, pc.excessItems());
         }
 
         totalCost.add(new RecipeCost(r, craftCount));
+        ItemCost.merge(excessCost, getExessItems());
 
         if(r.isMachineRecipe())
             ItemCost.merge(machineCost, r.costPerSecond());
 
-        return new PlanCost(totalCost.toArray(new RecipeCost[0]), baseCost.toArray(new ItemCost[0]), machineCost.toArray(new ItemCost[0]));
+        return new PlanCost(totalCost.toArray(new RecipeCost[0]), baseCost.toArray(new ItemCost[0]), machineCost.toArray(new ItemCost[0]), excessCost.toArray(new ItemCost[0]));
     }
 }

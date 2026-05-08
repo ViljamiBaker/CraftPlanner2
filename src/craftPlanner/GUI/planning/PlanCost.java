@@ -6,5 +6,6 @@ import craftPlanner.crafts.RecipeCost;
 public record PlanCost (
     RecipeCost[] totalCost,
     ItemCost[] baseCost,
-    ItemCost[] machineCost
+    ItemCost[] machineCost,
+    ItemCost[] excessItems
 ){}

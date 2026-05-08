@@ -9,6 +9,7 @@ import javax.swing.JFrame;
 import javax.swing.JTextField;
 
 import craftPlanner.GUI.MainFrame;
+import craftPlanner.GUI.util.GhostText;
 import craftPlanner.crafts.ItemCost;
 import craftPlanner.crafts.Recipe;
 import craftPlanner.crafts.Registry;

@@ -15,14 +15,9 @@ import java.io.File;
 import javax.swing.filechooser.FileFilter;
 
 import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.DefaultListModel;
-import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -36,7 +31,10 @@ import craftPlanner.GUI.actions.Actions;
 import craftPlanner.GUI.actions.TotalFrame;
 import craftPlanner.GUI.planning.PlanFrame;
 import craftPlanner.GUI.planning.PlanNodeEditor;
+import craftPlanner.GUI.planning.PlanNode.CraftStatus;
+import craftPlanner.GUI.util.ItemList;
 import craftPlanner.crafts.Item;
+import craftPlanner.crafts.ItemCost;
 import craftPlanner.crafts.Machine;
 import craftPlanner.crafts.Recipe;
 import craftPlanner.crafts.Registry;
@@ -45,12 +43,9 @@ import craftPlanner.fileIO.FileIO.FileType;
 public class MainFrame extends JFrame implements ActionListener, ItemListener{
     public static MainFrame mainFrame;
     Keyboard keyboard;
-    JList<Item> itemlist;
-    DefaultListModel<Item> listModel;
-    JList<Recipe> recipeList;
-    DefaultListModel<Recipe> recipeModel;
-    JList<Machine> machineList;
-    DefaultListModel<Machine> machineModel;
+    ItemList<Item> itemList;
+    ItemList<Recipe> recipeList;
+    ItemList<Machine> machineList;
     JTextArea info;
     JFileChooser chooser;
     public PlanFrame plan;
@@ -69,17 +64,15 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
 
         MainFrame.mainFrame = this;
         
-        //Settings.autoCreateItems = true;
         //Registry.createMachine("Miner",Registry.createItemCosts("100 Energy"));
         //Registry.createMachine("Furnace",Registry.createItemCosts("1500 Energy"));
-        //Registry.createMachineRecipe(Registry.createItemCosts("1 Ore, 2 Coal"), Registry.createItemCosts("1 Iron"), "Furnace", 5.0);
-        //Registry.createMachineRecipe(Registry.createItemCosts(""), Registry.createItemCosts("1 Ore"), "Miner", 15.0);
-        //Registry.createMachineRecipe(Registry.createItemCosts(""), Registry.createItemCosts("4 Coal"), "Miner", 12.0);
-        //Registry.createMachineRecipe(Registry.createItemCosts("1 Iron"), Registry.createItemCosts(""), "Miner", 1.0);
-        //Registry.createRecipe(Registry.createItemCosts("1 Ore, 2 Coal"), Registry.createItemCosts("1 Iron"));
-        //Registry.createRecipe(Registry.createItemCosts(""), Registry.createItemCosts("3 Ore"));
-        //Registry.createRecipe(Registry.createItemCosts(""), Registry.createItemCosts("4 Coal"));
-        //Settings.autoCreateItems = false;
+        //Registry.createMachineRecipe(Registry.createItemCosts("1 Ore, 2 Coal"), Registry.createItemCosts("1 Iron"), null, "Furnace", 5.0, "");
+        //Registry.createMachineRecipe(Registry.createItemCosts(""), Registry.createItemCosts("1 Ore"), null, "Miner", 15.0, "");
+        //Registry.createMachineRecipe(Registry.createItemCosts(""), Registry.createItemCosts("4 Coal"), null, "Miner", 12.0, "");
+        //Registry.createMachineRecipe(Registry.createItemCosts("1 Iron"), Registry.createItemCosts(""), null, "Miner", 1.0, "");
+        //Registry.createRecipe(Registry.createItemCosts("1 Ore, 2 Coal"), Registry.createItemCosts("1 Iron"), "");
+        //Registry.createRecipe(Registry.createItemCosts(""), Registry.createItemCosts("3 Ore"), "");
+        //Registry.createRecipe(Registry.createItemCosts(""), Registry.createItemCosts("4 Coal"), "");
     }
 
     public Container createContentPane() {
@@ -89,95 +82,17 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
         plan = new PlanFrame(keyboard);
         contentPane.add(plan, BorderLayout.CENTER);
 
-        JPanel itemPane = new JPanel(new BorderLayout(5,5));
-        listModel = new DefaultListModel<Item>();
-        itemlist = new JList<>(listModel);
-        itemlist.setLayoutOrientation(JList.VERTICAL);
-        itemlist.setVisibleRowCount(-1);
-        JScrollPane itemListScroll = new JScrollPane(itemlist);
-        itemListScroll.setPreferredSize(new Dimension(220, 770));
-        itemListScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        itemListScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        itemList = new ItemList<Item>(this,"Item", true, false, false);
+        contentPane.add(itemList, BorderLayout.LINE_END);
+        recipeList = new ItemList<Recipe>(this,"Recipe", true, true, true);
 
-        JPanel buttonPane = new JPanel();
-        buttonPane.setLayout(new BoxLayout(buttonPane, BoxLayout.LINE_AXIS));
-        buttonPane.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-        buttonPane.add(Box.createHorizontalGlue());
-
-        JButton destroyButton = new JButton("Destroy");
-        destroyButton.setActionCommand("DestroyItem");
-        destroyButton.addActionListener(this);
-
-        buttonPane.add(destroyButton);
-
-        itemPane.add(itemListScroll, BorderLayout.CENTER);
-        itemPane.add(buttonPane,BorderLayout.PAGE_END);
-        contentPane.add(itemPane, BorderLayout.LINE_END);
-        
-
-        JPanel RecipePane = new JPanel(new BorderLayout(5,5));
-        recipeModel = new DefaultListModel<Recipe>();
-        recipeList = new JList<>(recipeModel);
-        recipeList.setLayoutOrientation(JList.VERTICAL);
-        recipeList.setVisibleRowCount(-1);
-        JScrollPane RecipeListScroll = new JScrollPane(recipeList);
-        RecipeListScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        RecipeListScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-
-        JPanel buttonPaneR = new JPanel();
-        buttonPaneR.setLayout(new BoxLayout(buttonPaneR, BoxLayout.LINE_AXIS));
-        buttonPaneR.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-        buttonPaneR.add(Box.createHorizontalGlue());
-
-        JButton destroyButtonR = new JButton("Destroy");
-        destroyButtonR.setActionCommand("DestroyRecipe");
-        destroyButtonR.addActionListener(this);
-        buttonPaneR.add(destroyButtonR);
-
-        JButton addButtonR = new JButton("Add");
-        addButtonR.setActionCommand("AddRecipe");
-        addButtonR.addActionListener(this);
-        buttonPaneR.add(addButtonR);
-        JButton renameButtonR = new JButton("Rename");
-        renameButtonR.setActionCommand("RenameRecipe");
-        renameButtonR.addActionListener(this);
-        buttonPaneR.add(renameButtonR);
-
-        RecipePane.add(RecipeListScroll, BorderLayout.CENTER);
-        RecipePane.add(buttonPaneR,BorderLayout.PAGE_END);
-
-        JPanel MachinePane = new JPanel(new BorderLayout(5,5));
-        machineModel = new DefaultListModel<Machine>();
-        machineList = new JList<>(machineModel);
-        machineList.setLayoutOrientation(JList.VERTICAL);
-        machineList.setVisibleRowCount(-1);
-        JScrollPane MachineListScroll = new JScrollPane(machineList);
-        MachineListScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        MachineListScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-
-        JPanel buttonPaneM = new JPanel();
-        buttonPaneM.setLayout(new BoxLayout(buttonPaneM, BoxLayout.LINE_AXIS));
-        buttonPaneM.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-        buttonPaneM.add(Box.createHorizontalGlue());
-
-        JButton destroyButtonM = new JButton("Destroy");
-        destroyButtonM.setActionCommand("DestroyMachine");
-        destroyButtonM.addActionListener(this);
-        buttonPaneM.add(destroyButtonM);
-
-        JButton addButtonM = new JButton("Add");
-        addButtonM.setActionCommand("AddMachine");
-        addButtonM.addActionListener(this);
-        buttonPaneM.add(addButtonM);
-
-        MachinePane.add(MachineListScroll, BorderLayout.CENTER);
-        MachinePane.add(buttonPaneM,BorderLayout.PAGE_END);
+        machineList = new ItemList<Machine>(this,"Machine", true, false, false);
 
         JPanel combinedPane = new JPanel(new GridLayout(1,2));
         combinedPane.setPreferredSize(new Dimension(440,770));
 
-        combinedPane.add(MachinePane);
-        combinedPane.add(RecipePane);
+        combinedPane.add(machineList);
+        combinedPane.add(recipeList);
         contentPane.add(combinedPane, BorderLayout.LINE_START);
         
         GridLayout experimentLayout = new GridLayout(1,2);
@@ -260,8 +175,12 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
                 break;
 
             case "PlanSelected":
-                if(editor.selectedNode != null)
+                if(editor.selectedNode != null){
+                    if(editor.selectedNode.status != CraftStatus.GOOD){
+                        addInfo("Warn: Selected node is not happy, plan may not be accurate");
+                    }
                     new TotalFrame(editor.selectedNode);
+                }
                 break;
 
             case "Quit":
@@ -403,7 +322,7 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
     }
 
     private void destroySelectedItems(){
-        List<Item> selected = itemlist.getSelectedValuesList();
+        List<Item> selected = itemList.getSelectedValuesList();
         for (Item item : selected) {
             Registry.removeItem(item);
         }
@@ -434,18 +353,21 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
     }
 
     public void updateRegistery(){
-        listModel.removeAllElements();
+        itemList.removeAllValues();
         for (Item i : Registry.items) {
-            listModel.addElement(i);
+            itemList.addElement(i);
         }
-        recipeModel.removeAllElements();
+        itemList.update();
+        recipeList.removeAllValues();
         for (Recipe i : Registry.recipes) {
-            recipeModel.addElement(i);
+            recipeList.addElement(i);
         }
-        machineModel.removeAllElements();
+        recipeList.update();
+        machineList.removeAllValues();
         for (Machine i : Registry.machines) {
-            machineModel.addElement(i);
+            machineList.addElement(i);
         }
+        machineList.update();
     }
 
     public void update(){
@@ -453,7 +375,7 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
     }
 
     public Item[] getSelectedItems(){
-        return itemlist.getSelectedValuesList().toArray(new Item[0]);
+        return itemList.getSelectedValuesList().toArray(new Item[0]);
     }
     public Recipe[] getSelectedRecipies(){
         return recipeList.getSelectedValuesList().toArray(new Recipe[0]);
