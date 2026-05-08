@@ -2,13 +2,16 @@ package craftPlanner.crafts;
 
 import java.util.Arrays;
 
-public class Recipe {
+import craftPlanner.GUI.util.Hideable;
+
+public class Recipe implements Hideable{
     private ItemCost[] requirements;
     private ItemCost[] products; 
     private ItemCost[] costPerSecond;
     private Machine machine;
     private double craftTime;
     private String name;
+    public boolean hide = false;
     public Recipe(ItemCost[] requirements, ItemCost[] products, ItemCost[] costPerSecond, Machine machine, double craftTime, String name){
         this.requirements = requirements;
         this.products = products;
@@ -153,5 +156,9 @@ public class Recipe {
     }
     public void setRequirements(ItemCost[] requirements) {
         this.requirements = requirements;
+    }
+
+    public boolean hide(){
+        return hide;
     }
 }

@@ -110,8 +110,15 @@ public class PlanFrame extends JPanel{
     public PlanNode addPlanNode(Recipe r){
         return addPlanNode(r, SwingUtilities.convertPoint(this, 10 + (nodes.size() % 10) * 10,10 + (nodes.size() % 10) * 6, panel));
     }
+    public PlanNode addPlanNode(PlanNode node){
+        return addPlanNode(node, SwingUtilities.convertPoint(this, 10 + (nodes.size() % 10) * 10,10 + (nodes.size() % 10) * 6, panel));
+    }
     public PlanNode addPlanNode(Recipe r, Point p){
         PlanNode node = new PlanNode(r);
+        addPlanNode(node, p);
+        return node;
+    }
+    public PlanNode addPlanNode(PlanNode node, Point p){
         panel.add(node);
         panel.repaint();
         SwingUtilities.updateComponentTreeUI(panel);

@@ -26,7 +26,6 @@ public class Registry {
         Item oldItem = getItem(name);
         if(oldItem!=null) return oldItem;
         items.add(item);
-        MainFrame.mainFrame.updateRegistery();
         return item;
     }
     public static void removeItem(Item item){
@@ -77,7 +76,6 @@ public class Registry {
         Recipe oldRecipe = getRecipe(Recipe);
         if(oldRecipe!=null) return oldRecipe;
         recipes.add(Recipe);
-        MainFrame.mainFrame.updateRegistery();
         return Recipe;
     }
     public static void removeRecipe(Recipe r){
@@ -111,7 +109,6 @@ public class Registry {
         Machine oldMachine = getMachine(machine);
         if(oldMachine!=null) return oldMachine;
         machines.add(machine);
-        MainFrame.mainFrame.updateRegistery();
         return machine;
     }
     public static void removeMachine(Machine m){

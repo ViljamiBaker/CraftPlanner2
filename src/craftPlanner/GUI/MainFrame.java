@@ -29,12 +29,12 @@ import javax.swing.KeyStroke;
 import craftPlanner.Settings;
 import craftPlanner.GUI.actions.Actions;
 import craftPlanner.GUI.actions.TotalFrame;
+import craftPlanner.GUI.planning.ConsumerNode;
 import craftPlanner.GUI.planning.PlanFrame;
 import craftPlanner.GUI.planning.PlanNodeEditor;
 import craftPlanner.GUI.planning.PlanNode.CraftStatus;
 import craftPlanner.GUI.util.ItemList;
 import craftPlanner.crafts.Item;
-import craftPlanner.crafts.ItemCost;
 import craftPlanner.crafts.Machine;
 import craftPlanner.crafts.Recipe;
 import craftPlanner.crafts.Registry;
@@ -174,6 +174,14 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
                 file(false, FileType.COMBINED);
                 break;
 
+            case "CreateConsumer":
+                Item[] selItems = getSelectedItems();
+                if(selItems.length<=0) return;
+                ConsumerNode n = ConsumerNode.createConsumerNode(selItems[0]);
+                plan.addPlanNode(n);
+                updateRegistery();
+                break;
+
             case "PlanSelected":
                 if(editor.selectedNode != null){
                     if(editor.selectedNode.status != CraftStatus.GOOD){
@@ -289,7 +297,8 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
         menuBar.add(plan);
 
         plan.add(createMenuItem("Plan Selected Node", "PlanSelected", KeyEvent.VK_P));
-        plan.addSeparator();
+        plan.add(createMenuItem("Create Consumer of Item", "CreateConsumer", 0));
+        plan.add(createCheckbox("Show Consumer/Producer Recipies", "HideConsProd", 0));
         //plan.add(createCheckbox("Automatically Add Items", "AutoAdd", 0));
         //plan.add(createCheckbox("Require Round Crafts", "ReqRound", 0));
 
@@ -307,6 +316,9 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
                 break;
             case "RemPlan":
                 Settings.removePlanOnLoad = !Settings.removePlanOnLoad;
+                break;
+            case "HideConsProd":
+                Settings.hideSellAndCreateRecipies = !Settings.hideSellAndCreateRecipies;
                 break;
         
             default:
