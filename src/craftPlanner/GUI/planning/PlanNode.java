@@ -27,6 +27,7 @@ public class PlanNode extends DraggableComponent{
     private JTextField prodName;
     private JTextField craftCountText;
     public CraftStatus status;
+    public JPanel panel;
 
     private JTextField createTextFeild(String str, boolean highlightable, boolean outline){
         JTextField text = new JTextField(str);
@@ -41,7 +42,7 @@ public class PlanNode extends DraggableComponent{
     private void setupFrame(){
         this.setBounds(0,0,120,100);
         this.setOpaque(false);
-        JPanel panel = new JPanel(new GridBagLayout());
+        panel = new JPanel(new GridBagLayout());
         panel.setBorder(BorderFactory.createEmptyBorder(2,2,2,2));
         GridBagConstraints c = new GridBagConstraints();
         panel.setSize(120,100);

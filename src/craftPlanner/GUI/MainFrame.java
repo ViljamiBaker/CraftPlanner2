@@ -29,9 +29,11 @@ import javax.swing.KeyStroke;
 import craftPlanner.Settings;
 import craftPlanner.GUI.actions.Actions;
 import craftPlanner.GUI.actions.TotalFrame;
-import craftPlanner.GUI.planning.ConsumerNode;
 import craftPlanner.GUI.planning.PlanFrame;
+import craftPlanner.GUI.planning.PlanNode;
 import craftPlanner.GUI.planning.PlanNodeEditor;
+import craftPlanner.GUI.planning.PlanNodeHelper;
+import craftPlanner.GUI.planning.RecipeSolver;
 import craftPlanner.GUI.planning.PlanNode.CraftStatus;
 import craftPlanner.GUI.util.ItemList;
 import craftPlanner.crafts.Item;
@@ -175,11 +177,19 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
                 break;
 
             case "CreateConsumer":
-                Item[] selItems = getSelectedItems();
-                if(selItems.length<=0) return;
-                ConsumerNode n = ConsumerNode.createConsumerNode(selItems[0]);
-                plan.addPlanNode(n);
-                updateRegistery();
+                createSpawner(true);
+                break;
+            case "CreateBuyer":
+                createSpawner(false);
+                break;
+            case "SolveRec":
+                solveRecipe();
+                break;
+            case "SolveItem":
+                solveItem();
+                break;
+            case "SolveNode":
+                solveNode();
                 break;
 
             case "PlanSelected":
@@ -200,6 +210,39 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
                 System.err.println("Are you fucking stupid? " + e.getActionCommand());
                 break;
         }
+    }
+
+    public void createSpawner(boolean consumer){
+        Item[] selItems = getSelectedItems();
+        if(selItems.length<=0) return;
+        for (int i = 0; i < selItems.length; i++) {
+            PlanNode n;
+            if(consumer){
+                n = PlanNodeHelper.createConsumerNode(selItems[i]);
+            }else{
+                n = PlanNodeHelper.createProducerNode(selItems[i]);
+            }
+        plan.addPlanNode(n);
+        }
+        updateRegistery();
+    }
+
+    public void solveItem(){
+        Item[] selItems = getSelectedItems();
+        if(selItems.length<=0) return;
+        RecipeSolver.solve(selItems[0]);
+    }
+
+    public void solveNode(){
+        Recipe[] selRecipes = getSelectedRecipies();
+        if(selRecipes.length<=0) return;
+        RecipeSolver.solve(selRecipes[0]);
+    }
+
+    public void solveRecipe(){
+        PlanNode selNode = editor.selectedNode;
+        if(selNode==null) return;
+        RecipeSolver.solve(selNode);
     }
 
     public void file(boolean save, FileType type){
@@ -250,8 +293,8 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
         menuItem.setActionCommand(action);
         return menuItem;
     }
-    private JCheckBoxMenuItem createCheckbox(String text, String action, int key){
-        JCheckBoxMenuItem  cbItem = new JCheckBoxMenuItem(text);
+    private JCheckBoxMenuItem createCheckbox(String text, String action, int key, boolean sel){
+        JCheckBoxMenuItem  cbItem = new JCheckBoxMenuItem(text,sel);
         if(key!=0)
             cbItem.setAccelerator(KeyStroke.getKeyStroke(key, InputEvent.ALT_DOWN_MASK));
         cbItem.addItemListener(this);
@@ -278,7 +321,7 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
         file.add(createMenuItem("Save Combined", "SaveCombined", KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
         file.add(createMenuItem("Load Combined", "LoadCombined", KeyEvent.VK_L, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
         file.addSeparator();
-        file.add(createCheckbox("Remove Plan on Load", "RemPlan", 0));
+        file.add(createCheckbox("Remove Plan on Load", "RemPlan", 0, Settings.removePlanOnLoad));
         
         JMenu creation = new JMenu("Creation");
         creation.setMnemonic(KeyEvent.VK_C);
@@ -289,8 +332,8 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
         creation.add(createMenuItem("Create Machine", Actions.CREATE_MACHINE, KeyEvent.VK_M));
         creation.add(createMenuItem("Create Machine Recipe", Actions.CREATE_MACHINE_RECIPE, KeyEvent.VK_T));
         creation.addSeparator();
-        creation.add(createCheckbox("Automatically Add Items", "AutoAdd", 0));
-        creation.add(createCheckbox("Require Round Crafts", "ReqRound", 0));
+        creation.add(createCheckbox("Automatically Add Items", "AutoAdd", 0,Settings.autoCreateItems));
+        creation.add(createCheckbox("Require Round Crafts", "ReqRound", 0,Settings.requireRoundCrafts));
 
         JMenu plan = new JMenu("Plan");
         plan.setMnemonic(KeyEvent.VK_P);
@@ -298,7 +341,14 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
 
         plan.add(createMenuItem("Plan Selected Node", "PlanSelected", KeyEvent.VK_P));
         plan.add(createMenuItem("Create Consumer of Item", "CreateConsumer", 0));
-        plan.add(createCheckbox("Show Consumer/Producer Recipies", "HideConsProd", 0));
+        plan.add(createMenuItem("Create Producer of Item", "CreateBuyer", 0));
+        plan.addSeparator();
+        plan.add(createMenuItem("Solve Item", "SolveItem", 0));
+        plan.add(createMenuItem("Solve Recipe", "SolveRec", 0));
+        plan.add(createMenuItem("Solve Selected Node", "SolveNode", 0));
+        plan.addSeparator();
+        plan.add(createCheckbox("Show Consumer/Producer Recipies", "HideConsProd", 0, Settings.hideSellAndCreateRecipies));
+        plan.add(createCheckbox("Create Consumer if No Recipe", "CreateConsNoRec", 0,Settings.createConsumerifNoRecipe));
         //plan.add(createCheckbox("Automatically Add Items", "AutoAdd", 0));
         //plan.add(createCheckbox("Require Round Crafts", "ReqRound", 0));
 
@@ -309,16 +359,19 @@ public class MainFrame extends JFrame implements ActionListener, ItemListener{
         JMenuItem source = (JMenuItem)(e.getSource());
         switch (source.getActionCommand()) {
             case "AutoAdd":
-                Settings.autoCreateItems = !Settings.autoCreateItems;
+                Settings.autoCreateItems = e.getStateChange() == 1;
                 break;
             case "ReqRound":
-                Settings.requireRoundCrafts = !Settings.requireRoundCrafts;
+                Settings.requireRoundCrafts = e.getStateChange() == 1;
                 break;
             case "RemPlan":
-                Settings.removePlanOnLoad = !Settings.removePlanOnLoad;
+                Settings.removePlanOnLoad = e.getStateChange() == 1;
                 break;
             case "HideConsProd":
-                Settings.hideSellAndCreateRecipies = !Settings.hideSellAndCreateRecipies;
+                Settings.hideSellAndCreateRecipies = e.getStateChange() == 1;
+                break;
+            case "CreateConsNoRec":
+                Settings.createConsumerifNoRecipe = e.getStateChange() == 1;
                 break;
         
             default:

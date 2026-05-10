@@ -57,10 +57,10 @@ public class Registry {
         }
         return null;
     }
-    public static Recipe[] getRecipe(Item i){
+    public static Recipe[] getRecipe(Item i, boolean machine){
         ArrayList<Recipe> r = new ArrayList<>();
         for (Recipe recipe : recipes) {
-            if(recipe.producesItem(i)){
+            if(recipe.isMachineRecipe()==machine&&recipe.producesItem(i)){
                 r.add(recipe);
             }
         }

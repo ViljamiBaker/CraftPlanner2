@@ -1,0 +1,5 @@
+Update whole node graph from any node in chain
+    -- up + down movement
+
+Create solver for items
+    -- fuuuck
